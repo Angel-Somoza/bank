@@ -201,7 +201,7 @@ const ATMWelcome = () => {
                 <span className="material-symbols-outlined" style={{ fontSize: '40px', color: '#4ae176' }}>language</span>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: '24px', fontWeight: '600', color: '#dae2fd' }}>Español</div>
-                  <div style={{ fontSize: '16px', color: '#c4c6cf' }}>Continuar en Castellano</div>
+                  <div style={{ fontSize: '16px', color: '#c4c6cf' }}>Continuar en español  </div>
                 </div>
               </div>
               <span className="material-symbols-outlined" style={{ color: '#c4c6cf' }}>chevron_right</span>
@@ -322,38 +322,7 @@ const ATMWelcome = () => {
         </button>
       </nav>
 
-      {/* Status Toast */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '96px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 50,
-          ...glassStyle,
-          padding: '12px 24px',
-          borderRadius: '9999px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          borderColor: 'rgba(74, 225, 118, 0.2)',
-          boxShadow: '0 0 20px rgba(0,0,0,0.3)',
-        }}
-      >
-        <div
-          style={{
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            background: '#4ae176',
-            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-          }}
-        ></div>
-        <span style={{ fontSize: '14px', fontWeight: '600', color: '#dae2fd' }}>
-          Sistema Operativo • Listo para transaccionar
-        </span>
-      </div>
-
+    
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
