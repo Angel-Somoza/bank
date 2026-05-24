@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 
-const mainBank = () => {
+const MainBank = () => {
+  const navigate = useNavigate();
+
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -149,81 +152,120 @@ const mainBank = () => {
           }}
         >
           {menuItems.map((item, index) => (
-            <button
-              key={index}
-              style={{
-                ...glassStyle,
-                padding: '32px',
-                borderRadius: '12px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                gap: '16px',
-                textAlign: 'left',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                borderLeft: `4px solid ${index === 0 ? '#4ae176' : 'transparent'}`,
-                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                animation: `staggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-                animationDelay: `${item.delay}s`,
-                opacity: 0,
-                animationFillMode: 'forwards',
-                border: '1px solid rgba(142, 144, 153, 0.15)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = `0 0 30px 2px rgba(177, 199, 242, 0.15)`;
-                e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
-                e.currentTarget.style.background = 'rgba(34, 42, 61, 0.8)';
-                e.currentTarget.style.borderColor = 'rgba(177, 199, 242, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.background = glassStyle.background;
-                e.currentTarget.style.borderColor = 'rgba(142, 144, 153, 0.15)';
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'scale(0.96)';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
-              }}
-            >
-              {/* Icon */}
-              <div
-                style={{
-                  background: `${item.color}33`,
-                  padding: '16px',
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <span
-                  className="material-symbols-outlined"
-                  style={{
-                    fontSize: '32px',
-                    color: item.color,
-                    transition: 'transform 0.3s ease',
-                  }}
-                >
-                  {item.icon}
-                </span>
-              </div>
+  <button
+    key={index}
+    onClick={() => {
+      // SOLO navega en Retiro de Efectivo
+      if (item.label === 'Retiro de Efectivo') {
+        navigate("/account-selection");
+      }
+    }}
+    style={{
+      ...glassStyle,
+      padding: '32px',
+      borderRadius: '12px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      gap: '16px',
+      textAlign: 'left',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      borderLeft: `4px solid ${index === 0 ? '#4ae176' : 'transparent'}`,
+      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+      animation: `staggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+      animationDelay: `${item.delay}s`,
+      opacity: 0,
+      animationFillMode: 'forwards',
+      border: '1px solid rgba(142, 144, 153, 0.15)',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.boxShadow =
+        `0 0 30px 2px rgba(177, 199, 242, 0.15)`;
 
-              {/* Text */}
-              <div>
-                <h2 style={{ fontSize: '24px', lineHeight: '1.4', fontWeight: '600', color: '#dae2fd', marginBottom: '4px' }}>
-                  {item.label}
-                </h2>
-                <p style={{ fontSize: '16px', lineHeight: '1.2', letterSpacing: '0.05em', fontWeight: '600', color: '#c4c6cf' }}>
-                  {item.desc}
-                </p>
-              </div>
-            </button>
-          ))}
+      e.currentTarget.style.transform =
+        'translateY(-4px) scale(1.02)';
+
+      e.currentTarget.style.background =
+        'rgba(34, 42, 61, 0.8)';
+
+      e.currentTarget.style.borderColor =
+        'rgba(177, 199, 242, 0.3)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.boxShadow =
+        '0 10px 30px rgba(0,0,0,0.3)';
+
+      e.currentTarget.style.transform =
+        'translateY(0) scale(1)';
+
+      e.currentTarget.style.background =
+        glassStyle.background;
+
+      e.currentTarget.style.borderColor =
+        'rgba(142, 144, 153, 0.15)';
+    }}
+    onMouseDown={(e) => {
+      e.currentTarget.style.transform =
+        'scale(0.96)';
+    }}
+    onMouseUp={(e) => {
+      e.currentTarget.style.transform =
+        'translateY(-4px) scale(1.02)';
+    }}
+  >
+    {/* Icon */}
+    <div
+      style={{
+        background: `${item.color}33`,
+        padding: '16px',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transition: 'all 0.3s ease',
+      }}
+    >
+      <span
+        className="material-symbols-outlined"
+        style={{
+          fontSize: '32px',
+          color: item.color,
+          transition: 'transform 0.3s ease',
+        }}
+      >
+        {item.icon}
+      </span>
+    </div>
+
+    {/* Text */}
+    <div>
+      <h2
+        style={{
+          fontSize: '24px',
+          lineHeight: '1.4',
+          fontWeight: '600',
+          color: '#dae2fd',
+          marginBottom: '4px',
+        }}
+      >
+        {item.label}
+      </h2>
+
+      <p
+        style={{
+          fontSize: '16px',
+          lineHeight: '1.2',
+          letterSpacing: '0.05em',
+          fontWeight: '600',
+          color: '#c4c6cf',
+        }}
+      >
+        {item.desc}
+      </p>
+    </div>
+  </button>
+))}
         </div>
 
         {/* Security Badge */}
@@ -414,4 +456,4 @@ const mainBank = () => {
   );
 };
 
-export default mainBank;
+export default MainBank;
