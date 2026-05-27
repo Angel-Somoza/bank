@@ -102,22 +102,6 @@ const ATMWelcome = ({ onEspanol }) => {
         >
           SECUREBANK
         </div>
-
-        <div style={{ display: 'flex', gap: '24px' }}>
-          <span
-            className="material-symbols-outlined"
-            style={{ color: '#b1c7f2' }}
-          >
-            wifi
-          </span>
-
-          <span
-            className="material-symbols-outlined"
-            style={{ color: '#b1c7f2' }}
-          >
-            schedule
-          </span>
-        </div>
       </header>
 
       {/* Main */}

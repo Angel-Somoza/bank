@@ -9,9 +9,6 @@ const AccountSelection = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // =========================
-  // TOAST
-  // =========================
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowToast(true);
@@ -24,9 +21,7 @@ const AccountSelection = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // =========================
-  // OBTENER CUENTAS
-  // =========================
+
   useEffect(() => {
     const obtenerCuentas = async () => {
       try {
@@ -72,9 +67,6 @@ const AccountSelection = () => {
     obtenerCuentas();
   }, [navigate]);
 
-  // =========================
-  // LOADING
-  // =========================
   if (loading) {
     return (
       <div
@@ -105,7 +97,7 @@ const AccountSelection = () => {
         position: "relative",
       }}
     >
-      {/* HEADER */}
+      {}
       <header
         style={{
           position: "fixed",
@@ -133,31 +125,9 @@ const AccountSelection = () => {
         >
           SECUREBANK
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "28px",
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ color: "#4ae176", fontSize: "30px" }}
-          >
-            wifi
-          </span>
-
-          <span
-            className="material-symbols-outlined"
-            style={{ color: "#b1c7f2", fontSize: "30px" }}
-          >
-            schedule
-          </span>
-        </div>
       </header>
 
-      {/* MAIN */}
+      {}
       <main
         style={{
           paddingTop: "140px",
@@ -197,7 +167,7 @@ const AccountSelection = () => {
           </p>
         </div>
 
-        {/* SI NO HAY CUENTAS */}
+        {}
         {accounts.length === 0 && (
           <div
             style={{
@@ -211,7 +181,7 @@ const AccountSelection = () => {
           </div>
         )}
 
-        {/* CARDS */}
+        {}
         <div
           style={{
             width: "100%",
@@ -302,14 +272,14 @@ const AccountSelection = () => {
                   </span>
                 </div>
 
-                {/* CONTENT */}
+                {}
                 <div
                   style={{
                     position: "relative",
                     zIndex: 2,
                   }}
                 >
-                  {/* ICON */}
+                  {}
                   <div
                     style={{
                       width: "74px",
@@ -343,7 +313,7 @@ const AccountSelection = () => {
                     </span>
                   </div>
 
-                  {/* TIPO */}
+                  {}
                   <h3
                     style={{
                       fontSize: "36px",
@@ -358,7 +328,7 @@ const AccountSelection = () => {
                     {account.tipo_cuenta}
                   </h3>
 
-                  {/* NUMERO */}
+                  {}
                   <p
                     style={{
                       fontSize: "18px",
@@ -372,7 +342,7 @@ const AccountSelection = () => {
                     {account.numero_cuenta}
                   </p>
 
-                  {/* SALDO */}
+                  {}
                   <div
                     style={{
                       fontSize: "34px",
@@ -387,7 +357,7 @@ const AccountSelection = () => {
                   </div>
                 </div>
 
-                {/* FOOTER */}
+                {}
                 <div
                   style={{
                     position: "relative",
@@ -416,7 +386,7 @@ const AccountSelection = () => {
         </div>
       </main>
 
-      {/* TOAST */}
+      {}
       <div
         style={{
           position: "fixed",
@@ -532,7 +502,7 @@ const AccountSelection = () => {
     <span>Regresar</span>
   </button>
 
-  {/* DIVIDER */}
+  {}
   <div
     style={{
       height: "32px",
@@ -542,7 +512,7 @@ const AccountSelection = () => {
     }}
   />
 
-  {/* SALIR */}
+  {}
   <button
     onClick={() => navigate("/")}
     style={{

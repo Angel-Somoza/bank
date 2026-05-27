@@ -121,34 +121,6 @@ const WithdrawalSuccess = () => {
         >
           SECUREBANK
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{
-              fontSize: "24px",
-              color: "#4ae176",
-            }}
-          >
-            wifi
-          </span>
-
-          <span
-            className="material-symbols-outlined"
-            style={{
-              fontSize: "24px",
-              color: "#b1c7f2",
-            }}
-          >
-            schedule
-          </span>
-        </div>
       </header>
 
       {/* MAIN */}

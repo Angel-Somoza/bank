@@ -194,45 +194,6 @@ const ATMWithdrawalScreen = () => {
           SECUREBANK
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "28px",
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{
-              color: "#4ae176",
-              fontSize: "30px",
-            }}
-          >
-            wifi
-          </span>
-
-          <div style={{ textAlign: "right" }}>
-            <div
-              style={{
-                color: "#c4c6cf",
-                fontSize: "14px",
-                fontWeight: 600,
-              }}
-            >
-              {usuario?.username}
-            </div>
-
-            <div
-              style={{
-                color: "#4ae176",
-                fontSize: "14px",
-                fontWeight: 700,
-              }}
-            >
-              EN LÍNEA
-            </div>
-          </div>
-        </div>
       </header>
 
       {/* MAIN */}
