@@ -3,10 +3,24 @@ import { useNavigate } from "react-router-dom";
 
 const ATMWithdrawalScreen = () => {
   const navigate = useNavigate();
+
   const [showToast, setShowToast] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
-  const [hoveredAmount, setHoveredAmount] = useState(null);
 
+  // =========================
+  // CUENTA Y USUARIO
+  // =========================
+  const cuentaSeleccionada = JSON.parse(
+    localStorage.getItem("cuentaSeleccionada")
+  );
+
+  const usuario = JSON.parse(
+    localStorage.getItem("usuario")
+  );
+
+  // =========================
+  // TOAST
+  // =========================
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowToast(true);
@@ -19,6 +33,9 @@ const ATMWithdrawalScreen = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // =========================
+  // MONTOS
+  // =========================
   const amounts = [
     {
       value: "Q50",
@@ -50,6 +67,63 @@ const ATMWithdrawalScreen = () => {
     },
   ];
 
+  // =========================
+  // RETIRO
+  // =========================
+  const realizarRetiro = async (amountValue) => {
+    try {
+      const monto = Number(
+        amountValue.replace("Q", "").replace(",", "")
+      );
+
+      setSelectedAmount(amountValue);
+
+      const response = await fetch(
+        "http://localhost:3000/api/cajero/retiro",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            id_usuario: usuario.id_usuario,
+            id_cuenta: cuentaSeleccionada.id_cuenta,
+            monto: monto,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Error realizando retiro");
+        return;
+      }
+
+      // GUARDAR RESULTADO
+      localStorage.setItem(
+        "ultimoRetiro",
+        JSON.stringify({
+          monto,
+          saldo_actual: data.saldo_actual,
+          cuenta: cuentaSeleccionada.numero_cuenta,
+        })
+      );
+
+      navigate("/success", {
+        state: {
+          amount: monto,
+          saldo: data.saldo_actual,
+        },
+      });
+
+    } catch (error) {
+      console.error(error);
+      alert("Error conectando al servidor");
+    }
+  };
+
   return (
     <div
       style={{
@@ -61,7 +135,7 @@ const ATMWithdrawalScreen = () => {
         position: "relative",
       }}
     >
-      {/* BACKGROUND GLOWS */}
+      {/* GLOW */}
       <div
         style={{
           position: "fixed",
@@ -108,7 +182,6 @@ const ATMWithdrawalScreen = () => {
           alignItems: "center",
           padding: "0 40px",
           zIndex: 50,
-          animation: "fadeDown 0.8s ease",
         }}
       >
         <div
@@ -116,7 +189,6 @@ const ATMWithdrawalScreen = () => {
             fontSize: "28px",
             fontWeight: "800",
             color: "#b1c7f2",
-            letterSpacing: "1px",
           }}
         >
           SECUREBANK
@@ -131,16 +203,12 @@ const ATMWithdrawalScreen = () => {
         >
           <span
             className="material-symbols-outlined"
-            style={{ color: "#4ae176", fontSize: "30px" }}
+            style={{
+              color: "#4ae176",
+              fontSize: "30px",
+            }}
           >
             wifi
-          </span>
-
-          <span
-            className="material-symbols-outlined"
-            style={{ color: "#b1c7f2", fontSize: "30px" }}
-          >
-            schedule
           </span>
 
           <div style={{ textAlign: "right" }}>
@@ -151,7 +219,7 @@ const ATMWithdrawalScreen = () => {
                 fontWeight: 600,
               }}
             >
-              ATM #4022
+              {usuario?.username}
             </div>
 
             <div
@@ -184,7 +252,6 @@ const ATMWithdrawalScreen = () => {
         <div
           style={{
             marginBottom: "40px",
-            animation: "fadeUp 0.8s ease",
           }}
         >
           <h1
@@ -203,269 +270,303 @@ const ATMWithdrawalScreen = () => {
               fontSize: "20px",
             }}
           >
-            Elija una opción rápida o ingrese un monto personalizado.
+            Cuenta:
+            <span
+              style={{
+                color: "#4ae176",
+                marginLeft: "10px",
+                fontWeight: "700",
+              }}
+            >
+              {cuentaSeleccionada?.numero_cuenta}
+            </span>
           </p>
         </div>
 
         {/* GRID */}
-<div
-  style={{
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))",
-    gap: "28px",
-  }}
->
-  {amounts.map((amount, index) => {
-    const isSelected = selectedAmount === amount.value;
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit,minmax(300px,1fr))",
+            gap: "28px",
+          }}
+        >
+          {amounts.map((amount, index) => {
+            const isSelected =
+              selectedAmount === amount.value;
 
-    return (
-      <button
-        key={index}
-onClick={() => {
-  setSelectedAmount(amount.value);
+            return (
+              <button
+                key={index}
+                onClick={() =>
+                  realizarRetiro(amount.value)
+                }
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
 
-  const numericAmount = Number(
-    amount.value.replace("Q", "").replace(",", "")
-  );
+                  background: isSelected
+                    ? "#4ae176"
+                    : "rgba(23,31,51,0.55)",
 
-  navigate("/success", {
-    state: {
-      amount: numericAmount,
-    },
-  });
-}}
-        style={{
-          position: "relative",
-          overflow: "hidden",
+                  color: isSelected
+                    ? "#002109"
+                    : "#dae2fd",
 
-          /* NORMAL */
-          background: isSelected
-            ? "#4ae176"
-            : "rgba(23,31,51,0.55)",
+                  backdropFilter: "blur(20px)",
 
-          color: isSelected ? "#002109" : "#dae2fd",
+                  border: isSelected
+                    ? "1px solid #4ae176"
+                    : "1px solid rgba(142,144,153,0.2)",
 
-          backdropFilter: "blur(20px)",
+                  borderRadius: "26px",
+                  minHeight: "190px",
+                  padding: "30px",
+                  cursor: "pointer",
+                  transition: "all 0.35s ease",
 
-          border: isSelected
-            ? "1px solid #4ae176"
-            : "1px solid rgba(142,144,153,0.2)",
+                  boxShadow: isSelected
+                    ? "0 0 40px rgba(74,225,118,0.45)"
+                    : "0 10px 30px rgba(0,0,0,0.3)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background =
+                    "#4ae176";
 
-          borderRadius: "26px",
-          minHeight: "190px",
-          padding: "30px",
-          cursor: "pointer",
-          transition: "all 0.35s ease",
+                  e.currentTarget.style.color =
+                    "#002109";
 
-          boxShadow: isSelected
-            ? "0 0 40px rgba(74,225,118,0.45)"
-            : "0 10px 30px rgba(0,0,0,0.3)",
+                  e.currentTarget.style.transform =
+                    "translateY(-6px) scale(1.03)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background =
+                    isSelected
+                      ? "#4ae176"
+                      : "rgba(23,31,51,0.55)";
 
-          animation: `cardIn 0.6s ease forwards`,
-          animationDelay: `${index * 0.08}s`,
-          opacity: 0,
-          transform: "translateY(40px)",
-        }}
-        onMouseEnter={(e) => {
-          /* TODO VERDE AL PASAR EL MOUSE */
-          e.currentTarget.style.background = "#4ae176";
-          e.currentTarget.style.color = "#002109";
-          e.currentTarget.style.border = "1px solid #4ae176";
-          e.currentTarget.style.boxShadow =
-            "0 0 45px rgba(74,225,118,0.55)";
-          e.currentTarget.style.transform =
-            "translateY(-6px) scale(1.03)";
-        }}
-        onMouseLeave={(e) => {
-          /* VUELVE A NORMAL */
-          e.currentTarget.style.background = isSelected
-            ? "#4ae176"
-            : "rgba(23,31,51,0.55)";
+                  e.currentTarget.style.color =
+                    isSelected
+                      ? "#002109"
+                      : "#dae2fd";
 
-          e.currentTarget.style.color = isSelected
-            ? "#002109"
-            : "#dae2fd";
+                  e.currentTarget.style.transform =
+                    "translateY(0px) scale(1)";
+                }}
+              >
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 2,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "54px",
+                      fontWeight: "800",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    {amount.value}
+                  </div>
 
-          e.currentTarget.style.border = isSelected
-            ? "1px solid #4ae176"
-            : "1px solid rgba(142,144,153,0.2)";
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      fontSize: "16px",
+                    }}
+                  >
+                    <span
+                      className="material-symbols-outlined"
+                      style={{
+                        color: isSelected
+                          ? "#003915"
+                          : "#4ae176",
+                      }}
+                    >
+                      payments
+                    </span>
 
-          e.currentTarget.style.boxShadow = isSelected
-            ? "0 0 40px rgba(74,225,118,0.45)"
-            : "0 10px 30px rgba(0,0,0,0.3)";
+                    {amount.description}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
 
-          e.currentTarget.style.transform =
-            "translateY(0px) scale(1)";
-        }}
-      >
-        <div style={{ position: "relative", zIndex: 2 }}>
-          <div
+          {/* OTRO MONTO */}
+          <button
             style={{
-              fontSize: "54px",
-              fontWeight: "800",
-              marginBottom: "16px",
-              color: isSelected ? "#002109" : "#dae2fd",
-              transition: "0.3s",
+              background: "rgba(23,31,51,0.55)",
+              color: "#dae2fd",
+              border:
+                "1px solid rgba(142,144,153,0.2)",
+              borderRadius: "26px",
+              minHeight: "190px",
+              padding: "30px",
+              cursor: "pointer",
+              transition: "all 0.35s ease",
+              boxShadow:
+                "0 10px 30px rgba(0,0,0,0.3)",
             }}
-            className="amount-text"
           >
-            {amount.value}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              color: isSelected ? "#003915" : "#c4c6cf",
-              fontSize: "16px",
-            }}
-            className="amount-description"
-          >
-            <span
-              className="material-symbols-outlined"
+            <div
               style={{
-                color: isSelected ? "#003915" : "#4ae176",
-                fontVariationSettings: "'FILL' 1",
+                fontSize: "34px",
+                marginBottom: "16px",
               }}
             >
-              payments
-            </span>
+              Otro Monto
+            </div>
 
-            {amount.description}
-          </div>
-        </div>
-      </button>
-    );
-  })}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "10px",
+                opacity: 0.9,
+              }}
+            >
+              <span className="material-symbols-outlined">
+                dialpad
+              </span>
 
-  {/* OTHER AMOUNT */}
+              Entrada personalizada
+            </div>
+          </button>
+          <nav
+  style={{
+    position: "fixed",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "16px",
+    paddingLeft: "40px",
+    paddingRight: "40px",
+    paddingTop: "20px",
+    paddingBottom: "20px",
+    background: "rgba(6, 14, 32, 0.9)",
+    backdropFilter: "blur(32px)",
+    borderTop: "1px solid rgba(68, 71, 78, 0.3)",
+    boxShadow: "0px -10px 30px rgba(0,0,0,0.4)",
+    borderTopLeftRadius: "12px",
+    borderTopRightRadius: "12px",
+    zIndex: 50,
+  }}
+>
+  {/* REGRESAR */}
   <button
+    onClick={() => navigate(-1)}
     style={{
-      background: "rgba(23,31,51,0.55)",
-      color: "#dae2fd",
-      border: "1px solid rgba(142,144,153,0.2)",
-      borderRadius: "26px",
-      minHeight: "190px",
-      padding: "30px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "#c4c6cf",
+      paddingLeft: "48px",
+      paddingRight: "48px",
+      paddingTop: "12px",
+      paddingBottom: "12px",
+      background: "transparent",
+      border: "none",
       cursor: "pointer",
-      transition: "all 0.35s ease",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-      fontWeight: "700",
-      animation: "cardIn 0.6s ease forwards",
-      animationDelay: "0.5s",
-      opacity: 0,
-      transform: "translateY(40px)",
+      transition: "all 0.3s ease",
+      borderRadius: "12px",
+      fontSize: "14px",
+      fontWeight: "600",
+      textTransform: "uppercase",
     }}
     onMouseEnter={(e) => {
-      /* MISMO EFECTO VERDE */
-      e.currentTarget.style.background = "#4ae176";
-      e.currentTarget.style.color = "#002109";
-      e.currentTarget.style.border = "1px solid #4ae176";
-      e.currentTarget.style.transform =
-        "translateY(-6px) scale(1.03)";
-      e.currentTarget.style.boxShadow =
-        "0 0 45px rgba(74,225,118,0.55)";
+      e.currentTarget.style.background =
+        "rgba(177, 199, 242, 0.1)";
+      e.currentTarget.style.color = "#b1c7f2";
     }}
     onMouseLeave={(e) => {
       e.currentTarget.style.background =
-        "rgba(23,31,51,0.55)";
-      e.currentTarget.style.color = "#dae2fd";
-      e.currentTarget.style.border =
-        "1px solid rgba(142,144,153,0.2)";
-      e.currentTarget.style.transform =
-        "translateY(0px) scale(1)";
-      e.currentTarget.style.boxShadow =
-        "0 10px 30px rgba(0,0,0,0.3)";
+        "transparent";
+      e.currentTarget.style.color = "#c4c6cf";
     }}
   >
-    <div
+    <span
+      className="material-symbols-outlined"
       style={{
-        fontSize: "34px",
-        marginBottom: "16px",
+        fontSize: "32px",
+        marginBottom: "4px",
       }}
     >
-      Otro Monto
-    </div>
+      arrow_back
+    </span>
 
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "10px",
-        opacity: 0.9,
-      }}
-    >
-      <span className="material-symbols-outlined">
-        dialpad
-      </span>
-
-      Entrada personalizada
-    </div>
+    <span>Regresar</span>
   </button>
-</div>
 
-    
+  {/* DIVIDER */}
+  <div
+    style={{
+      height: "32px",
+      width: "1px",
+      background:
+        "rgba(68, 71, 78, 0.3)",
+    }}
+  />
+
+  {/* SALIR */}
+  <button
+    onClick={() => navigate("/")}
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "#c4c6cf",
+      paddingLeft: "48px",
+      paddingRight: "48px",
+      paddingTop: "12px",
+      paddingBottom: "12px",
+      background: "transparent",
+      border: "none",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      borderRadius: "12px",
+      fontSize: "14px",
+      fontWeight: "600",
+      textTransform: "uppercase",
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.background =
+        "rgba(255, 180, 171, 0.1)";
+      e.currentTarget.style.color =
+        "#ffb4ab";
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.background =
+        "transparent";
+      e.currentTarget.style.color =
+        "#c4c6cf";
+    }}
+  >
+    <span
+      className="material-symbols-outlined"
+      style={{
+        fontSize: "32px",
+        marginBottom: "4px",
+      }}
+    >
+      logout
+    </span>
+
+    <span>Salir</span>
+  </button>
+</nav>
+        </div>
       </main>
-
-      {/* BOTTOM NAV */}
-      <nav
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          padding: "24px",
-          background: "rgba(6,14,32,0.92)",
-          backdropFilter: "blur(20px)",
-          borderTop: "1px solid rgba(68,71,78,0.3)",
-          display: "flex",
-          justifyContent: "center",
-          gap: "32px",
-          zIndex: 50,
-          animation: "fadeUp 1s ease",
-        }}
-      >
-        {[
-          { icon: "cancel", label: "Cancel" },
-          { icon: "logout", label: "Exit" },
-        ].map((item, index) => (
-          <button
-            key={index}
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "#c4c6cf",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "8px",
-              padding: "12px 40px",
-              borderRadius: "16px",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                "rgba(255,180,171,0.12)";
-              e.currentTarget.style.color = "#ffb4ab";
-              e.currentTarget.style.transform = "translateY(-3px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "#c4c6cf";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            <span className="material-symbols-outlined">
-              {item.icon}
-            </span>
-
-            {item.label}
-          </button>
-        ))}
-      </nav>
 
       {/* TOAST */}
       <div
@@ -476,18 +577,26 @@ onClick={() => {
           transform: showToast
             ? "translate(-50%,0)"
             : "translate(-50%,-40px)",
+
           opacity: showToast ? 1 : 0,
+
           transition: "all 0.5s ease",
+
           background: "rgba(23,31,51,0.8)",
           backdropFilter: "blur(20px)",
-          border: "1px solid rgba(74,225,118,0.3)",
+
+          border:
+            "1px solid rgba(74,225,118,0.3)",
+
           borderRadius: "999px",
+
           padding: "14px 24px",
+
           display: "flex",
           alignItems: "center",
           gap: "12px",
+
           zIndex: 100,
-          boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
         }}
       >
         <span
@@ -502,39 +611,6 @@ onClick={() => {
 
       {/* ANIMATIONS */}
       <style>{`
-        @keyframes fadeDown {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes cardIn {
-          from {
-            opacity: 0;
-            transform: translateY(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
         @keyframes floatGlow {
           from {
             transform: translateY(0px) translateX(0px);

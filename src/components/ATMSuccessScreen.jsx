@@ -5,16 +5,31 @@ const WithdrawalSuccess = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [hoveredButton, setHoveredButton] = useState(null);
+  const [hoveredButton, setHoveredButton] =
+    useState(null);
 
-  // MONTO RECIBIDO DESDE LA PANTALLA ANTERIOR
-  const selectedAmount = location.state?.amount || 0;
+  // DATOS
+  const selectedAmount =
+    location.state?.amount || 0;
 
-  // SALDO INICIAL
-  const initialBalance = 12450.5;
+  const usuario =
+    JSON.parse(
+      localStorage.getItem("usuario")
+    ) || {};
 
-  // NUEVO SALDO
-  const remainingBalance = initialBalance - selectedAmount;
+  const cuenta =
+    JSON.parse(
+      localStorage.getItem(
+        "cuentaSeleccionada"
+      )
+    ) || {};
+
+  const saldoAnterior = Number(
+    cuenta.saldo || 0
+  );
+
+  const saldoActual =
+    saldoAnterior - selectedAmount;
 
   // FORMATO GTQ
   const formatCurrency = (value) => {
@@ -26,69 +41,80 @@ const WithdrawalSuccess = () => {
   };
 
   const glassStyle = {
-    background: "rgba(23, 31, 51, 0.6)",
+    background: "rgba(23, 31, 51, 0.65)",
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
-    border: "1px solid rgba(142, 144, 153, 0.1)",
+    border:
+      "1px solid rgba(142, 144, 153, 0.1)",
   };
 
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100dvh",
+        minHeight: "100vh",
         background: "#0b1326",
         color: "#dae2fd",
         fontFamily: "Inter, sans-serif",
-        overflow: "hidden",
+
+        /* IMPORTANTE */
+        overflowY: "auto",
+        overflowX: "hidden",
+
         position: "relative",
       }}
     >
       {/* BACKGROUND */}
       <div
         style={{
-          position: "absolute",
-          top: "-100px",
-          left: "-100px",
-          width: "400px",
-          height: "400px",
+          position: "fixed",
+          top: "-120px",
+          left: "-120px",
+          width: "320px",
+          height: "320px",
           borderRadius: "50%",
-          background: "rgba(74,225,118,0.08)",
+          background:
+            "rgba(74,225,118,0.08)",
           filter: "blur(120px)",
+          zIndex: 0,
         }}
       />
 
       <div
         style={{
-          position: "absolute",
+          position: "fixed",
           bottom: "-120px",
           right: "-120px",
-          width: "420px",
-          height: "420px",
+          width: "320px",
+          height: "320px",
           borderRadius: "50%",
-          background: "rgba(177,199,242,0.08)",
-          filter: "blur(140px)",
+          background:
+            "rgba(177,199,242,0.08)",
+          filter: "blur(120px)",
+          zIndex: 0,
         }}
       />
 
       {/* HEADER */}
       <header
         style={{
-          height: "80px",
+          height: "70px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "0 32px",
-          background: "rgba(23,31,51,0.8)",
-          backdropFilter: "blur(30px)",
-          borderBottom: "1px solid rgba(68,71,78,0.2)",
+          padding: "0 24px",
+          background:
+            "rgba(23,31,51,0.82)",
+          backdropFilter: "blur(24px)",
+          borderBottom:
+            "1px solid rgba(68,71,78,0.2)",
+          position: "sticky",
+          top: 0,
           zIndex: 20,
         }}
       >
         <div
           style={{
-            fontSize: "28px",
+            fontSize: "22px",
             fontWeight: "800",
             color: "#b1c7f2",
           }}
@@ -100,19 +126,25 @@ const WithdrawalSuccess = () => {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "18px",
+            gap: "14px",
           }}
         >
           <span
             className="material-symbols-outlined"
-            style={{ fontSize: "30px", color: "#4ae176" }}
+            style={{
+              fontSize: "24px",
+              color: "#4ae176",
+            }}
           >
             wifi
           </span>
 
           <span
             className="material-symbols-outlined"
-            style={{ fontSize: "30px", color: "#b1c7f2" }}
+            style={{
+              fontSize: "24px",
+              color: "#b1c7f2",
+            }}
           >
             schedule
           </span>
@@ -122,23 +154,43 @@ const WithdrawalSuccess = () => {
       {/* MAIN */}
       <main
         style={{
-          flex: 1,
+          width: "100%",
           display: "flex",
           justifyContent: "center",
-          alignItems: "center",
-          padding: "20px",
+          alignItems: "flex-start",
+
+          /* MAS ESPACIO ABAJO */
+          paddingTop: "24px",
+          paddingBottom: "140px",
+
+          paddingLeft: "14px",
+          paddingRight: "14px",
+
           position: "relative",
           zIndex: 2,
+
+          boxSizing: "border-box",
         }}
       >
         <div
           style={{
             width: "100%",
-            maxWidth: "720px",
+            maxWidth: "500px",
+
             ...glassStyle,
-            borderRadius: "28px",
-            padding: "28px",
-            boxShadow: "0 0 50px rgba(74,225,118,0.08)",
+
+            borderRadius: "22px",
+
+            /* MAS PEQUEÑO */
+            padding: "18px",
+
+            boxShadow:
+              "0 0 26px rgba(74,225,118,0.08)",
+
+            /* IMPORTANTE */
+            marginBottom: "80px",
+
+            boxSizing: "border-box",
           }}
         >
           {/* ICON */}
@@ -146,27 +198,29 @@ const WithdrawalSuccess = () => {
             style={{
               display: "flex",
               justifyContent: "center",
-              marginBottom: "16px",
+              marginBottom: "12px",
             }}
           >
             <div
               style={{
-                width: "90px",
-                height: "90px",
+                width: "72px",
+                height: "72px",
                 borderRadius: "50%",
                 background: "#4ae176",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 0 40px rgba(74,225,118,0.3)",
+                boxShadow:
+                  "0 0 24px rgba(74,225,118,0.25)",
               }}
             >
               <span
                 className="material-symbols-outlined"
                 style={{
-                  fontSize: "50px",
+                  fontSize: "38px",
                   color: "#0b1326",
-                  fontVariationSettings: "'FILL' 1",
+                  fontVariationSettings:
+                    "'FILL' 1",
                 }}
               >
                 check
@@ -178,15 +232,15 @@ const WithdrawalSuccess = () => {
           <div
             style={{
               textAlign: "center",
-              marginBottom: "20px",
+              marginBottom: "18px",
             }}
           >
             <h1
               style={{
-                fontSize: "42px",
+                fontSize: "34px",
                 fontWeight: "800",
                 color: "#4ae176",
-                marginBottom: "8px",
+                marginBottom: "6px",
               }}
             >
               Retiro Exitoso
@@ -194,11 +248,13 @@ const WithdrawalSuccess = () => {
 
             <p
               style={{
-                fontSize: "16px",
+                fontSize: "14px",
                 color: "#c4c6cf",
+                lineHeight: 1.4,
               }}
             >
-              Su transacción ha sido procesada correctamente.
+              Su transacción ha sido
+              procesada correctamente.
             </p>
           </div>
 
@@ -207,42 +263,88 @@ const WithdrawalSuccess = () => {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "12px",
-              marginBottom: "20px",
+              gap: "10px",
+              marginBottom: "18px",
             }}
           >
             {[
               {
-                label: "Cuenta de origen",
-                value: "Cuenta Monetaria",
+                label: "Usuario",
+                value: `${
+                  usuario.nombre || ""
+                } ${
+                  usuario.apellido || ""
+                }`,
                 color: "#dae2fd",
               },
               {
-                label: "Monto retirado",
-                value: formatCurrency(selectedAmount),
+                label: "Cuenta",
+                value: cuenta.tipo_cuenta,
                 color: "#dae2fd",
               },
               {
-                label: "Saldo restante",
-                value: formatCurrency(remainingBalance),
+                label: "Número",
+                value:
+                  cuenta.numero_cuenta,
+                color: "#dae2fd",
+              },
+              {
+                label: "Retirado",
+                value:
+                  formatCurrency(
+                    selectedAmount
+                  ),
+                color: "#dae2fd",
+              },
+              {
+                label: "Saldo Anterior",
+                value:
+                  formatCurrency(
+                    saldoAnterior
+                  ),
+                color: "#dae2fd",
+              },
+              {
+                label: "Saldo Actual",
+                value:
+                  formatCurrency(
+                    saldoActual
+                  ),
                 color: "#4ae176",
               },
             ].map((item, index) => (
               <div
                 key={index}
                 style={{
-                  background: "rgba(34,42,61,0.7)",
-                  border: "1px solid rgba(142,144,153,0.12)",
-                  borderRadius: "18px",
-                  padding: "16px 20px",
+                  background:
+                    item.label ===
+                    "Saldo Actual"
+                      ? "rgba(74,225,118,0.08)"
+                      : "rgba(34,42,61,0.75)",
+
+                  border:
+                    item.label ===
+                    "Saldo Actual"
+                      ? "1px solid rgba(74,225,118,0.25)"
+                      : "1px solid rgba(142,144,153,0.12)",
+
+                  borderRadius: "14px",
+
+                  /* MAS PEQUEÑO */
+                  padding: "12px 14px",
+
                   display: "flex",
-                  justifyContent: "space-between",
+                  justifyContent:
+                    "space-between",
                   alignItems: "center",
+                  gap: "10px",
+
+                  flexWrap: "wrap",
                 }}
               >
                 <span
                   style={{
-                    fontSize: "16px",
+                    fontSize: "13px",
                     fontWeight: "600",
                     color: "#c4c6cf",
                   }}
@@ -252,9 +354,11 @@ const WithdrawalSuccess = () => {
 
                 <span
                   style={{
-                    fontSize: "20px",
+                    fontSize: "14px",
                     fontWeight: "800",
                     color: item.color,
+                    textAlign: "right",
+                    wordBreak: "break-word",
                   }}
                 >
                   {item.value}
@@ -267,45 +371,66 @@ const WithdrawalSuccess = () => {
           <div
             style={{
               display: "flex",
-              gap: "14px",
-              flexWrap: "wrap",
+              flexDirection: "column",
+              gap: "10px",
+
+              /* IMPORTANTE */
+              paddingBottom: "10px",
             }}
           >
-            {/* PRINT */}
+            {/* IMPRIMIR */}
             <button
-              onMouseEnter={() => setHoveredButton("print")}
-              onMouseLeave={() => setHoveredButton(null)}
+              onMouseEnter={() =>
+                setHoveredButton("print")
+              }
+              onMouseLeave={() =>
+                setHoveredButton(null)
+              }
               style={{
-                flex: 1,
-                minHeight: "70px",
+                width: "100%",
+                minHeight: "54px",
+
                 border: "none",
-                borderRadius: "20px",
-                padding: "0 20px",
+                borderRadius: "14px",
+
+                padding: "0 14px",
+
                 background:
-                  hoveredButton === "print"
+                  hoveredButton ===
+                  "print"
                     ? "#64ff8a"
                     : "#4ae176",
+
                 color: "#0b1326",
+
                 display: "flex",
-                justifyContent: "space-between",
+                justifyContent:
+                  "space-between",
                 alignItems: "center",
+
                 cursor: "pointer",
                 transition: "0.3s",
+
                 fontWeight: "800",
+                fontSize: "13px",
+
+                flexShrink: 0,
               }}
             >
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px",
+                  gap: "8px",
                 }}
               >
                 <span className="material-symbols-outlined">
                   print
                 </span>
 
-                <span>Imprimir Recibo</span>
+                <span>
+                  Imprimir Recibo
+                </span>
               </div>
 
               <span className="material-symbols-outlined">
@@ -313,44 +438,66 @@ const WithdrawalSuccess = () => {
               </span>
             </button>
 
-            {/* EMAIL */}
+            {/* FINALIZAR */}
             <button
-              onMouseEnter={() => setHoveredButton("mail")}
-              onMouseLeave={() => setHoveredButton(null)}
+              onClick={() =>
+                navigate("/")
+              }
+              onMouseEnter={() =>
+                setHoveredButton("finish")
+              }
+              onMouseLeave={() =>
+                setHoveredButton(null)
+              }
               style={{
-                flex: 1,
-                minHeight: "70px",
-                borderRadius: "20px",
-                padding: "0 20px",
+                width: "100%",
+                minHeight: "54px",
+
+                borderRadius: "14px",
+
+                padding: "0 14px",
+
                 background:
-                  hoveredButton === "mail"
+                  hoveredButton ===
+                  "finish"
                     ? "#4ae176"
                     : "rgba(34,42,61,0.8)",
+
                 color:
-                  hoveredButton === "mail"
+                  hoveredButton ===
+                  "finish"
                     ? "#0b1326"
                     : "#4ae176",
-                border: "1px solid rgba(74,225,118,0.3)",
+
+                border:
+                  "1px solid rgba(74,225,118,0.25)",
+
                 display: "flex",
-                justifyContent: "space-between",
+                justifyContent:
+                  "space-between",
                 alignItems: "center",
+
                 cursor: "pointer",
                 transition: "0.3s",
+
                 fontWeight: "800",
+                fontSize: "13px",
+
+                flexShrink: 0,
               }}
             >
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px",
+                  gap: "8px",
                 }}
               >
                 <span className="material-symbols-outlined">
-                  mail
+                  logout
                 </span>
 
-                <span>Enviar por Email</span>
+                <span>Finalizar</span>
               </div>
 
               <span className="material-symbols-outlined">
@@ -360,6 +507,7 @@ const WithdrawalSuccess = () => {
           </div>
         </div>
       </main>
+      
     </div>
   );
 };
