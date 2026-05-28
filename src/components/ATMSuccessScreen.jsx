@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import jsPDF from "jspdf";
 
 const WithdrawalSuccess = () => {
   const navigate = useNavigate();
@@ -47,6 +48,84 @@ const WithdrawalSuccess = () => {
     border:
       "1px solid rgba(142, 144, 153, 0.1)",
   };
+
+const generarComprobantePDF = () => {
+  const doc = new jsPDF();
+
+  const fecha = new Date().toLocaleString("es-GT");
+
+  doc.setFillColor(11, 19, 38);
+  doc.rect(0, 0, 210, 297, "F");
+
+  doc.setFillColor(23, 31, 51);
+  doc.roundedRect(15, 15, 180, 260, 8, 8, "F");
+
+  doc.setTextColor(74, 225, 118);
+  doc.setFontSize(24);
+  doc.setFont("helvetica", "bold");
+  doc.text("SECUREBANK", 105, 35, { align: "center" });
+
+  doc.setTextColor(218, 226, 253);
+  doc.setFontSize(18);
+  doc.text("Comprobante de Retiro", 105, 50, { align: "center" });
+
+  doc.setDrawColor(74, 225, 118);
+  doc.line(30, 60, 180, 60);
+
+  doc.setFontSize(12);
+  doc.setTextColor(196, 198, 207);
+
+  const datos = [
+    ["Cliente", `${usuario.nombre || ""} ${usuario.apellido || ""}`],
+    ["Tipo de cuenta", cuenta.tipo_cuenta || "N/A"],
+    ["Número de cuenta", cuenta.numero_cuenta || "N/A"],
+    ["Monto retirado", formatCurrency(selectedAmount)],
+    ["Saldo anterior", formatCurrency(saldoAnterior)],
+    //["Saldo actual", formatCurrency(saldoActual)],
+    ["Fecha", fecha],
+    ["Estado", "Exitosa"],
+  ];
+
+  let y = 78;
+
+  datos.forEach(([label, value]) => {
+    doc.setTextColor(196, 198, 207);
+    doc.setFont("helvetica", "bold");
+    doc.text(label + ":", 30, y);
+
+    doc.setTextColor(218, 226, 253);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(value), 90, y);
+
+    y += 14;
+  });
+
+  doc.setDrawColor(74, 225, 118);
+  doc.line(30, y + 5, 180, y + 5);
+
+  doc.setFontSize(10);
+  doc.setTextColor(196, 198, 207);
+  doc.text(
+    "Gracias por utilizar nuestros servicios.",
+    105,
+    y + 25,
+    { align: "center" }
+  );
+
+  doc.text(
+    "Este comprobante fue generado electrónicamente.",
+    105,
+    y + 35,
+    { align: "center" }
+  );
+
+  doc.save(`comprobante-retiro-${Date.now()}.pdf`);
+  /*
+  const pdfBlob = doc.output("blob");
+  const pdfUrl = URL.createObjectURL(pdfBlob);
+  window.open(pdfUrl);
+  */
+};
 
   return (
     <div
@@ -352,6 +431,7 @@ const WithdrawalSuccess = () => {
           >
             {/* IMPRIMIR */}
             <button
+            onClick={generarComprobantePDF}
               onMouseEnter={() =>
                 setHoveredButton("print")
               }

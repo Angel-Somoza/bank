@@ -78,16 +78,29 @@ const ATMWithdrawalScreen = () => {
 
       setSelectedAmount(amountValue);
 
+      const token = localStorage.getItem("token");
+
+
+      if (!token) {
+        alert("Sesión no encontrada");
+        navigate("/");
+        return;
+      }
+      if (!cuentaSeleccionada) {
+        alert("No hay cuenta seleccionada");
+        navigate("/account-selection");
+        return;
+      }
+
       const response = await fetch(
-        "http://localhost:3000/api/cajero/retiro",
+        "http://localhost:3001/api/cajero/retiro",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-
           body: JSON.stringify({
-            id_usuario: usuario.id_usuario,
             id_cuenta: cuentaSeleccionada.id_cuenta,
             monto: monto,
           }),

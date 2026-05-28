@@ -23,49 +23,46 @@ const AccountSelection = () => {
 
 
   useEffect(() => {
-    const obtenerCuentas = async () => {
-      try {
-        const usuario = JSON.parse(
-          localStorage.getItem("usuario")
-        );
+  const obtenerCuentas = async () => {
+    try {
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const token = localStorage.getItem("token");
 
-        console.log("USUARIO:", usuario);
-
-        if (!usuario) {
-          alert("Sesión no encontrada");
-          navigate("/");
-          return;
-        }
-
-        const idCliente = usuario.id_cliente;
-
-        console.log("ID CLIENTE:", idCliente);
-
-        const response = await fetch(
-          `http://localhost:3000/api/cajero/cuentas/${idCliente}`
-        );
-
-        const data = await response.json();
-
-        console.log("RESPUESTA:", data);
-
-        if (!response.ok) {
-          alert(data.message || "Error obteniendo cuentas");
-          return;
-        }
-
-        setAccounts(data.cuentas);
-
-      } catch (error) {
-        console.error(error);
-        alert("Error conectando al servidor");
-      } finally {
-        setLoading(false);
+      if (!usuario || !token) {
+        alert("Sesión no encontrada");
+        navigate("/");
+        return;
       }
-    };
 
-    obtenerCuentas();
-  }, [navigate]);
+      const response = await fetch(
+        "http://localhost:3001/api/cajero/cuentas",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Error obteniendo cuentas");
+        return;
+      }
+
+      setAccounts(data.cuentas);
+    } catch (error) {
+      console.error(error);
+      alert("Error conectando al servidor");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  obtenerCuentas();
+}, [navigate]);
 
   if (loading) {
     return (

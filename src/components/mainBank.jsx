@@ -5,12 +5,22 @@ const MainBank = () => {
   const navigate = useNavigate();
 
   const [time, setTime] = useState(new Date());
+  const usuario = JSON.parse(
+    localStorage.getItem("usuario")) || {};
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Sesión no encontrada");
+    navigate("/");
+  }
+}, [navigate]);
   const formatTime = (date) => {
     return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   };
@@ -122,7 +132,7 @@ const MainBank = () => {
           }}
         >
           <h1 style={{ fontSize: '48px', lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '700', marginBottom: '8px', color: '#dae2fd' }}>
-            Hola, Alejandro
+            Hola, {usuario.nombre}
           </h1>
           <p style={{ fontSize: '20px', lineHeight: '1.5', fontWeight: '400', color: '#c4c6cf' }}>
             ¿Qué transacción deseas realizar el día de hoy?
