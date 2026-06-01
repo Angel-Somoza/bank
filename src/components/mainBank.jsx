@@ -153,10 +153,14 @@ const MainBank = () => {
   <button
     key={index}
     onClick={() => {
-      // SOLO navega en Retiro de Efectivo
+      
       if (item.label === 'Retiro de Efectivo') {
         navigate("/account-selection");
       }
+      if (item.label === 'Consulta de Saldo') {
+        navigate("/balance");
+      }
+      
     }}
     style={{
       ...glassStyle,

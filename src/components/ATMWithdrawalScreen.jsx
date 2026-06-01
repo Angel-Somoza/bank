@@ -6,10 +6,6 @@ const ATMWithdrawalScreen = () => {
 
   const [showToast, setShowToast] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
-
-  // =========================
-  // CUENTA Y USUARIO
-  // =========================
   const cuentaSeleccionada = JSON.parse(
     localStorage.getItem("cuentaSeleccionada")
   );
@@ -17,10 +13,6 @@ const ATMWithdrawalScreen = () => {
   const usuario = JSON.parse(
     localStorage.getItem("usuario")
   );
-
-  // =========================
-  // TOAST
-  // =========================
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowToast(true);
@@ -93,7 +85,7 @@ const ATMWithdrawalScreen = () => {
       }
 
       const response = await fetch(
-        "http://localhost:3001/api/cajero/retiro",
+        "http://localhost:3000/api/cajero/retiro",
         {
           method: "POST",
           headers: {

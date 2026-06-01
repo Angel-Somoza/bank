@@ -26,7 +26,7 @@ const PINKeypad = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:3001/api/cajero/login",
+        "http://localhost:3000/api/cajero/login",
         {
           method: "POST",
           headers: {
@@ -34,7 +34,7 @@ const PINKeypad = () => {
           },
 
           body: JSON.stringify({
-            username: "axelavila",
+            username: "angel",
             password: pin,
           }),
         }

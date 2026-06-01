@@ -5,6 +5,8 @@ import MainBank from "./components/mainBank";
 import AccountSelection from "./components/AccountSelection";
 import ATMWithdrawalScreen from "./components/ATMWithdrawalScreen";
 import ATMSuccessScreen from "./components/ATMSuccessScreen";
+import BalanceScreen from "./components/BalanceScreen";
+
 
 import "./index.css";
 
@@ -40,6 +42,8 @@ function App() {
         <Route
           path="/success"
           element={<ATMSuccessScreen />}
+        />
+        <Route path="/balance" element={<BalanceScreen />} 
         />
       </Routes>
     </BrowserRouter>

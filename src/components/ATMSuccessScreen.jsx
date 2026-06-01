@@ -9,7 +9,6 @@ const WithdrawalSuccess = () => {
   const [hoveredButton, setHoveredButton] =
     useState(null);
 
-  // DATOS
   const selectedAmount =
     location.state?.amount || 0;
 
@@ -120,11 +119,7 @@ const generarComprobantePDF = () => {
   );
 
   doc.save(`comprobante-retiro-${Date.now()}.pdf`);
-  /*
-  const pdfBlob = doc.output("blob");
-  const pdfUrl = URL.createObjectURL(pdfBlob);
-  window.open(pdfUrl);
-  */
+
 };
 
   return (
@@ -134,15 +129,13 @@ const generarComprobantePDF = () => {
         background: "#0b1326",
         color: "#dae2fd",
         fontFamily: "Inter, sans-serif",
-
-        /* IMPORTANTE */
         overflowY: "auto",
         overflowX: "hidden",
 
         position: "relative",
       }}
     >
-      {/* BACKGROUND */}
+      {}
       <div
         style={{
           position: "fixed",
@@ -202,7 +195,7 @@ const generarComprobantePDF = () => {
         </div>
       </header>
 
-      {/* MAIN */}
+      {}
       <main
         style={{
           width: "100%",
@@ -210,7 +203,6 @@ const generarComprobantePDF = () => {
           justifyContent: "center",
           alignItems: "flex-start",
 
-          /* MAS ESPACIO ABAJO */
           paddingTop: "24px",
           paddingBottom: "140px",
 
@@ -232,19 +224,17 @@ const generarComprobantePDF = () => {
 
             borderRadius: "22px",
 
-            /* MAS PEQUEÑO */
             padding: "18px",
 
             boxShadow:
               "0 0 26px rgba(74,225,118,0.08)",
 
-            /* IMPORTANTE */
             marginBottom: "80px",
 
             boxSizing: "border-box",
           }}
         >
-          {/* ICON */}
+          {}
           <div
             style={{
               display: "flex",
@@ -279,7 +269,7 @@ const generarComprobantePDF = () => {
             </div>
           </div>
 
-          {/* TITLE */}
+          {}
           <div
             style={{
               textAlign: "center",
@@ -309,7 +299,7 @@ const generarComprobantePDF = () => {
             </p>
           </div>
 
-          {/* INFO */}
+          {}
           <div
             style={{
               display: "flex",
@@ -418,18 +408,18 @@ const generarComprobantePDF = () => {
             ))}
           </div>
 
-          {/* BUTTONS */}
+          {}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               gap: "10px",
 
-              /* IMPORTANTE */
+           
               paddingBottom: "10px",
             }}
           >
-            {/* IMPRIMIR */}
+            {}
             <button
             onClick={generarComprobantePDF}
               onMouseEnter={() =>

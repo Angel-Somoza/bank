@@ -35,13 +35,14 @@ const AccountSelection = () => {
       }
 
       const response = await fetch(
-        "http://localhost:3001/api/cajero/cuentas",
+        "http://localhost:3000/api/cajero/cuentas",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify({ idCliente: usuario.id_cliente }),
         }
       );
 
@@ -336,7 +337,7 @@ const AccountSelection = () => {
                         : "#c4c6cf",
                     }}
                   >
-                    {account.numero_cuenta}
+                    No. {account.numero_cuenta}
                   </p>
 
                   {}
