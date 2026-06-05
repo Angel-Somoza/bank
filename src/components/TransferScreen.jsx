@@ -156,8 +156,6 @@ const TransferScreen = () => {
       }
 
       const montoNumerico = parseFloat(amount);
-      
-      // Obtener el ID de la cuenta destino (puede venir como id_cuenta o id_cuenta_destino)
       const idDestino = cuentaDestino.id_cuenta || cuentaDestino.id_cuenta_destino;
       const idOrigen = Number(selectedSource);
       
@@ -195,30 +193,36 @@ const TransferScreen = () => {
 
       alert("Transferencia realizada correctamente");
 
-      // Limpiar cuenta destino después de la transferencia
       localStorage.removeItem("cuentaDestino");
       setCuentaDestino(null);
 
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-      alert("Error conectando al servidor");
-    } finally {
-      setLoading(false);
-    }
-  };
+      navigate("/comprobante", {
+      state: {
+        monto: montoNumerico,
+        autorizacion: `ATM-${Date.now()}`,
+        fecha: new Date(),
+        cuentaOrigen: accounts.find(acc => acc.id_cuenta === selectedSource)?.numero_cuenta?.slice(-4) || "****",
+        cuentaOrigenTipo: accounts.find(acc => acc.id_cuenta === selectedSource)?.tipo_cuenta || "Monetaria",
+        cuentaDestino: cuentaDestino.nombre_titular,
+        bancoDestino: "SecureBank",
+        concepto: concept || "Transferencia realizada"
+      }
+    });
 
-  // =========================================
-  // LOADING
-  // =========================================
+  } catch (error) {
+    console.error(error);
+    alert("Error conectando al servidor");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (loading || loadingAccounts) {
     return <LoadingScreen />;
   }
 
-  // =========================================
-  // UI
-  // =========================================
+ 
 
   return (
     <div

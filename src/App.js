@@ -12,6 +12,8 @@ import TransferScreen from "./components/TransferScreen";
 import DestinationSelectionScreen from "./components/DestinationSelectionScreen";
 import AddDestinationScreen from "./components/AddDestinationScreen";
 import ChangePinScreen from "./components/ChangePinScreen";
+import ComprobanteScreen from "./components/ComprobanteScreen";
+
 
 
 
@@ -66,6 +68,7 @@ function App() {
          />
          <Route path="/change-pin" element={<ChangePinScreen />} 
          />
+         <Route path="/comprobante" element={<ComprobanteScreen />} />
        </Routes>
     </BrowserRouter>
   );

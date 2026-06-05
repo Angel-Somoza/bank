@@ -1,21 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import jsPDF from "jspdf";
+import LoadingScreen from "./LoadingScreen";
 
-const WithdrawalSuccess = () => {
+const ComprobanteScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(new Date());
-
+  const [comprobante, setComprobante] = useState(null);
   const [hoveredButton, setHoveredButton] = useState(null);
 
-  const selectedAmount = location.state?.amount || 0;
-
-  const usuario = JSON.parse(localStorage.getItem("usuario")) || {};
-  const cuenta = JSON.parse(localStorage.getItem("cuentaSeleccionada")) || {};
-
-  const saldoAnterior = Number(cuenta.saldo || 0);
-  const saldoActual = saldoAnterior - selectedAmount;
+  useEffect(() => {
+    const datos = location.state;
+    if (datos) {
+      setComprobante(datos);
+      localStorage.setItem("ultimoComprobante", JSON.stringify(datos));
+    } else {
+      const saved = localStorage.getItem("ultimoComprobante");
+      if (saved) {
+        setComprobante(JSON.parse(saved));
+      } else {
+        navigate("/");
+      }
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -29,6 +38,14 @@ const WithdrawalSuccess = () => {
     });
   };
 
+  const formatDate = (date) => {
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("es-GT", {
       style: "currency",
@@ -37,12 +54,7 @@ const WithdrawalSuccess = () => {
     }).format(value);
   };
 
-  const glassStyle = {
-    background: "rgba(23, 31, 51, 0.65)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    border: "1px solid rgba(142, 144, 153, 0.1)",
-  };
+  const usuario = JSON.parse(localStorage.getItem("usuario")) || {};
 
   const generarComprobantePDF = () => {
     const doc = new jsPDF();
@@ -60,7 +72,7 @@ const WithdrawalSuccess = () => {
 
     doc.setTextColor(218, 226, 253);
     doc.setFontSize(18);
-    doc.text("Comprobante de Retiro", 105, 50, { align: "center" });
+    doc.text("Comprobante de Transferencia", 105, 50, { align: "center" });
 
     doc.setDrawColor(74, 225, 118);
     doc.line(30, 60, 180, 60);
@@ -70,9 +82,12 @@ const WithdrawalSuccess = () => {
 
     const datos = [
       ["Cliente", `${usuario.nombre || ""} ${usuario.apellido || ""}`],
-      ["Tipo de cuenta", cuenta.tipo_cuenta || "N/A"],
-      ["Número de cuenta", cuenta.numero_cuenta || "N/A"],
-      ["Monto retirado", formatCurrency(selectedAmount)],
+      ["Cuenta Origen", `${datosComprobante.cuentaOrigenTipo || "Monetaria"} **** ${datosComprobante.cuentaOrigen || "4829"}`],
+      ["Cuenta Destino", datosComprobante.cuentaDestino || "N/A"],
+      ["Banco Destino", datosComprobante.bancoDestino || "SecureBank"],
+      ["Monto Transferido", formatCurrency(datosComprobante.monto || 0)],
+      ["Concepto", datosComprobante.concepto || "Transferencia realizada"],
+      ["Número de Autorización", datosComprobante.autorizacion || `ATM-${Date.now()}`],
       ["Fecha", fecha],
       ["Estado", "Exitosa"],
     ];
@@ -84,8 +99,10 @@ const WithdrawalSuccess = () => {
       doc.text(label + ":", 30, y);
       doc.setTextColor(218, 226, 253);
       doc.setFont("helvetica", "normal");
-      doc.text(String(value), 90, y);
-      y += 14;
+      // Para textos largos, ajustar
+      const lines = doc.splitTextToSize(String(value), 80);
+      doc.text(lines, 90, y);
+      y += 12 + (lines.length - 1) * 6;
     });
 
     doc.setDrawColor(74, 225, 118);
@@ -94,7 +111,22 @@ const WithdrawalSuccess = () => {
     doc.setTextColor(196, 198, 207);
     doc.text("Gracias por utilizar nuestros servicios.", 105, y + 25, { align: "center" });
     doc.text("Este comprobante fue generado electrónicamente.", 105, y + 35, { align: "center" });
-    doc.save(`comprobante-retiro-${Date.now()}.pdf`);
+    doc.save(`comprobante-transferencia-${Date.now()}.pdf`);
+  };
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  const datosComprobante = comprobante || {
+    monto: 1250.00,
+    autorizacion: "ATM-82931044",
+    fecha: new Date(),
+    cuentaOrigen: "**** 4829",
+    cuentaOrigenTipo: "Monetaria",
+    cuentaDestino: "Juan Pérez",
+    bancoDestino: "SecureBank",
+    concepto: "Transferencia realizada"
   };
 
   return (
@@ -110,6 +142,7 @@ const WithdrawalSuccess = () => {
       <style>{`
         @keyframes fadeInDown { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
       `}</style>
 
       {/* Blobs decorativos */}
@@ -130,35 +163,41 @@ const WithdrawalSuccess = () => {
 
       {/* Main */}
       <main style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", paddingTop: "80px", paddingBottom: "100px", paddingLeft: "16px", paddingRight: "16px", position: "relative", zIndex: 2 }}>
-        <div style={{ width: "100%", maxWidth: "450px", ...glassStyle, borderRadius: "20px", padding: "24px", boxShadow: "0 0 26px rgba(74,225,118,0.08)" }}>
+        <div style={{ width: "100%", maxWidth: "450px", background: "rgba(23,31,51,0.65)", backdropFilter: "blur(20px)", border: "1px solid rgba(142,144,153,0.1)", borderRadius: "20px", padding: "24px", boxShadow: "0 0 26px rgba(74,225,118,0.08)" }}>
           
           {/* Icono check */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
             <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "#4ae176", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 20px rgba(74,225,118,0.25)" }}>
-              <span className="material-symbols-outlined" style={{ fontSize: "36px", color: "#0b1326", fontVariationSettings: "'FILL' 1" }}>check</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "36px", color: "#0b1326", fontVariationSettings: "'FILL' 1" }}>check_circle</span>
             </div>
           </div>
 
           {/* Título */}
           <div style={{ textAlign: "center", marginBottom: "20px" }}>
-            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#4ae176", marginBottom: "4px" }}>Retiro Exitoso</h1>
+            <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#4ae176", marginBottom: "4px" }}>Transferencia Exitosa</h1>
             <p style={{ fontSize: "13px", color: "#c4c6cf" }}>Su transacción ha sido procesada correctamente.</p>
           </div>
 
           {/* Detalles */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
             {[
-              { label: "Usuario", value: `${usuario.nombre || ""} ${usuario.apellido || ""}`, color: "#dae2fd" },
-              { label: "Cuenta", value: cuenta.tipo_cuenta, color: "#dae2fd" },
-              { label: "Número", value: cuenta.numero_cuenta, color: "#dae2fd" },
-              { label: "Retirado", value: formatCurrency(selectedAmount), color: "#dae2fd" },
-              { label: "Saldo Actual", value: formatCurrency(saldoActual), color: "#4ae176" },
+              { label: "Monto", value: formatCurrency(datosComprobante.monto), color: "#4ae176", highlight: true },
+              { label: "Cuenta Origen", value: `${datosComprobante.cuentaOrigenTipo || "Monetaria"} **** ${datosComprobante.cuentaOrigen || "4829"}`, color: "#dae2fd" },
+              { label: "Destinatario", value: datosComprobante.cuentaDestino || "N/A", color: "#dae2fd" },
+              { label: "Banco", value: datosComprobante.bancoDestino || "SecureBank", color: "#dae2fd" },
+              { label: "Concepto", value: datosComprobante.concepto || "Transferencia realizada", color: "#c4c6cf" },
+              { label: "Autorización", value: datosComprobante.autorizacion || `ATM-${Date.now()}`, color: "#c4c6cf" },
             ].map((item, index) => (
-              <div key={index} style={{ background: item.label === "Saldo Actual" ? "rgba(74,225,118,0.08)" : "rgba(34,42,61,0.75)", border: item.label === "Saldo Actual" ? "1px solid rgba(74,225,118,0.25)" : "1px solid rgba(142,144,153,0.12)", borderRadius: "12px", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+              <div key={index} style={{ background: item.highlight ? "rgba(74,225,118,0.08)" : "rgba(34,42,61,0.75)", border: item.highlight ? "1px solid rgba(74,225,118,0.25)" : "1px solid rgba(142,144,153,0.12)", borderRadius: "12px", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                 <span style={{ fontSize: "12px", fontWeight: "600", color: "#c4c6cf" }}>{item.label}</span>
-                <span style={{ fontSize: "14px", fontWeight: "800", color: item.color, textAlign: "right", wordBreak: "break-word" }}>{item.value}</span>
+                <span style={{ fontSize: "14px", fontWeight: item.highlight ? "800" : "600", color: item.color, textAlign: "right", wordBreak: "break-word" }}>{item.value}</span>
               </div>
             ))}
+          </div>
+
+          {/* Fecha */}
+          <div style={{ textAlign: "center", marginBottom: "20px", fontSize: "11px", color: "#c4c6cf" }}>
+            {formatDate(datosComprobante.fecha || new Date())}, {formatTime(datosComprobante.fecha || new Date())}
           </div>
 
           {/* Botones */}
@@ -167,7 +206,7 @@ const WithdrawalSuccess = () => {
               style={{ width: "100%", minHeight: "48px", border: "none", borderRadius: "12px", padding: "0 14px", background: hoveredButton === "print" ? "#64ff8a" : "#4ae176", color: "#0b1326", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", transition: "0.3s", fontWeight: "800", fontSize: "13px", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>print</span>
-                <span>Imprimir Recibo</span>
+                <span>Descargar Comprobante</span>
               </div>
               <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>chevron_right</span>
             </button>
@@ -187,4 +226,4 @@ const WithdrawalSuccess = () => {
   );
 };
 
-export default WithdrawalSuccess;
+export default ComprobanteScreen;
