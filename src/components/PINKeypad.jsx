@@ -9,13 +9,6 @@ const PINKeypad = () => {
 
   const maxPinLength = 4;
 
-  // Mapeo de PINs a usuarios
-  const pinToUser = {
-    "1111": "axelavila",
-    "2222": "mariolopez",
-    "1234": "angel"
-  };
-
   const handleNumberClick = (num) => {
     if (pin.length < maxPinLength) {
       setPin(pin + num);
@@ -29,28 +22,17 @@ const PINKeypad = () => {
   const handleConfirm = async () => {
     if (pin.length !== maxPinLength) return;
 
-    // Obtener el username según el PIN ingresado
-    const username = pinToUser[pin];
-    
-    if (!username) {
-      alert("PIN incorrecto");
-      setPin("");
-      return;
-    }
-
     try {
       setLoading(true);
-
       const response = await fetch(
-        "https://cajero-online.onrender.com/api/cajero/login",
+        "https://cajero-online.onrender.com/api/cajero/login-by-pin",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: username,
-            password: pin,
+            pin: pin,
           }),
         }
       );
@@ -60,25 +42,17 @@ const PINKeypad = () => {
       console.log("RESPUESTA LOGIN:", data);
 
       if (!response.ok) {
-        alert(data.message || "Error al iniciar sesión");
+        alert(data.message || "PIN incorrecto");
         setPin("");
+        setLoading(false);
         return;
       }
 
       // GUARDAR USUARIO
-      localStorage.setItem(
-        "usuario", 
-        JSON.stringify(data.usuario)
-      );
-      localStorage.setItem(
-        "token", 
-        data.token
-      );
+      localStorage.setItem("usuario", JSON.stringify(data.usuario));
+      localStorage.setItem("token", data.token || "fake-token");
 
-      console.log(
-        "USUARIO GUARDADO:",
-        JSON.parse(localStorage.getItem("usuario"))
-      );
+      console.log("USUARIO GUARDADO:", JSON.parse(localStorage.getItem("usuario")));
 
       navigate("/main");
 
@@ -93,11 +67,9 @@ const PINKeypad = () => {
 
   const getPinDisplay = () => {
     const display = [];
-
     for (let i = 0; i < maxPinLength; i++) {
       display.push(i < pin.length);
     }
-
     return display;
   };
 
@@ -216,7 +188,7 @@ const PINKeypad = () => {
             maxWidth: "420px",
           }}
         >
-          {[1,2,3,4,5,6,7,8,9].map((num) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
             <button
               key={num}
               onClick={() => handleNumberClick(num)}
@@ -251,14 +223,8 @@ const PINKeypad = () => {
             disabled={pin.length !== 4 || loading}
             style={{
               ...keypadButtonStyle,
-              background:
-                pin.length === 4
-                  ? "#4ae176"
-                  : "rgba(74,225,118,0.2)",
-              color:
-                pin.length === 4
-                  ? "#0b1326"
-                  : "#4ae176",
+              background: pin.length === 4 ? "#4ae176" : "rgba(74,225,118,0.2)",
+              color: pin.length === 4 ? "#0b1326" : "#4ae176",
               fontWeight: "800",
             }}
           >
@@ -314,37 +280,22 @@ const PINKeypad = () => {
             textTransform: "uppercase",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background =
-              "rgba(177, 199, 242, 0.1)";
+            e.currentTarget.style.background = "rgba(177, 199, 242, 0.1)";
             e.currentTarget.style.color = "#b1c7f2";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background =
-              "transparent";
+            e.currentTarget.style.background = "transparent";
             e.currentTarget.style.color = "#c4c6cf";
           }}
         >
-          <span
-            className="material-symbols-outlined"
-            style={{
-              fontSize: "32px",
-              marginBottom: "4px",
-            }}
-          >
+          <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>
             arrow_back
           </span>
           <span>Regresar</span>
         </button>
 
         {/* DIVIDER */}
-        <div
-          style={{
-            height: "32px",
-            width: "1px",
-            background:
-              "rgba(68, 71, 78, 0.3)",
-          }}
-        />
+        <div style={{ height: "32px", width: "1px", background: "rgba(68, 71, 78, 0.3)" }} />
 
         {/* SALIR */}
         <button
@@ -369,25 +320,15 @@ const PINKeypad = () => {
             textTransform: "uppercase",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background =
-              "rgba(255, 180, 171, 0.1)";
-            e.currentTarget.style.color =
-              "#ffb4ab";
+            e.currentTarget.style.background = "rgba(255, 180, 171, 0.1)";
+            e.currentTarget.style.color = "#ffb4ab";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background =
-              "transparent";
-            e.currentTarget.style.color =
-              "#c4c6cf";
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "#c4c6cf";
           }}
         >
-          <span
-            className="material-symbols-outlined"
-            style={{
-              fontSize: "32px",
-              marginBottom: "4px",
-            }}
-          >
+          <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>
             logout
           </span>
           <span>Salir</span>

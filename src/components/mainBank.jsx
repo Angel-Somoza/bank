@@ -54,9 +54,7 @@ const MainBank = () => {
     { icon: 'payments', label: 'Retiro de Efectivo', desc: 'Dispensa billetes de forma rápida', color: '#b1c7f2', delay: 0.1 },
     { icon: 'account_balance_wallet', label: 'Consulta de Saldo', desc: 'Verifica tus cuentas y ahorros', color: '#b1c7f2', delay: 0.2 },
     { icon: 'sync_alt', label: 'Transferencias', desc: 'Envía dinero a otras cuentas', color: '#b1c7f2', delay: 0.3 },
-    { icon: 'receipt_long', label: 'Pagos', desc: 'Servicios, tarjetas y convenios', color: '#b1c7f2', delay: 0.4 },
     { icon: 'lock_reset', label: 'Cambio de Clave', desc: 'Actualiza tu PIN de seguridad', color: '#b1c7f2', delay: 0.5 },
-    { icon: 'grid_view', label: 'Otros Servicios', desc: 'Donaciones, recargas y más', color: '#b1c7f2', delay: 0.6 },
   ];
 
   if (loading) {
@@ -183,6 +181,9 @@ const MainBank = () => {
                   if(item.label === "Transferencias"){
                     navigate("/transfer")
                   }
+                  if (item.label === 'Cambio de Clave') {
+  navigate("/change-pin");
+}
                 }}
                 onMouseEnter={() => setHoveredCard(index)}
                 onMouseLeave={() => setHoveredCard(null)}

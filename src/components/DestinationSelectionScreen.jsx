@@ -195,56 +195,32 @@ const DestinationSelectionScreen = () => {
         }}
       />
 
-      {/* HEADER */}
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 40px",
-          height: "80px",
-          background: "rgba(23,31,51,0.8)",
-          backdropFilter: "blur(40px)",
-          borderBottom: "1px solid rgba(68,71,78,0.2)",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          animation: "fadeInDown 0.8s ease-out forwards",
-        }}
-      >
-        <div
+      {/* Header */}
+        <header
           style={{
-            fontSize: "24px",
-            fontWeight: "800",
-            color: "#b1c7f2",
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '0 40px',
+            height: '80px',
+            background: 'rgba(23, 31, 51, 0.8)',
+            backdropFilter: 'blur(40px)',
+            borderBottom: '1px solid rgba(68, 71, 78, 0.2)',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            animation: 'fadeInDown 0.8s ease-out forwards',
           }}
         >
-          SECUREBANK
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "24px",
-            color: "#c4c6cf",
-          }}
-        >
-          <span className="material-symbols-outlined">wifi</span>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <span className="material-symbols-outlined">schedule</span>
-            <span>{formatTime(time)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', letterSpacing: '0.5px', color: '#b1c7f2' }}>
+              SECUREBANK
+            </span>
           </div>
-        </div>
-      </header>
+        </header>
+
 
       {/* MAIN */}
       <main
@@ -287,41 +263,10 @@ const DestinationSelectionScreen = () => {
                 fontSize: "20px",
               }}
             >
-              Elige una cuenta de tus favoritos o agrega una nueva para continuar.
+              Elige una cuenta o agrega una nueva para continuar.
             </p>
           </div>
 
-          {/* Conexión Segura Badge */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "8px 20px",
-              background: "rgba(23,31,51,0.6)",
-              backdropFilter: "blur(20px)",
-              borderRadius: "999px",
-              border: "1px solid rgba(74,225,118,0.2)",
-            }}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ color: "#4ae176", fontSize: "16px" }}
-            >
-              security
-            </span>
-            <span
-              style={{
-                fontSize: "11px",
-                fontWeight: "700",
-                color: "#4ae176",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-              }}
-            >
-              CONEXIÓN SEGURA
-            </span>
-          </div>
         </div>
 
         {/* GRID 2 COLUMNAS */}
@@ -617,116 +562,22 @@ const DestinationSelectionScreen = () => {
         Seleccione una cuenta destino para continuar
       </div>
 
-      {/* BOTTOM NAVIGATION */}
-      <nav
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "16px",
-          paddingLeft: "40px",
-          paddingRight: "40px",
-          paddingTop: "20px",
-          paddingBottom: "20px",
-          background: "rgba(6,14,32,0.9)",
-          backdropFilter: "blur(32px)",
-          borderTop: "1px solid rgba(68,71,78,0.3)",
-          boxShadow: "0px -10px 30px rgba(0,0,0,0.4)",
-          borderTopLeftRadius: "12px",
-          borderTopRightRadius: "12px",
-          zIndex: 50,
-        }}
-      >
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#c4c6cf",
-            paddingLeft: "48px",
-            paddingRight: "48px",
-            paddingTop: "12px",
-            paddingBottom: "12px",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            borderRadius: "12px",
-            fontSize: "14px",
-            fontWeight: "600",
-            textTransform: "uppercase",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(177,199,242,0.1)";
-            e.currentTarget.style.color = "#b1c7f2";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "#c4c6cf";
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: "32px", marginBottom: "4px" }}
-          >
-            cancel
-          </span>
-          <span>Cancelar</span>
-        </button>
-
-        <div
-          style={{
-            height: "32px",
-            width: "1px",
-            background: "rgba(68,71,78,0.3)",
-          }}
-        />
-
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#c4c6cf",
-            paddingLeft: "48px",
-            paddingRight: "48px",
-            paddingTop: "12px",
-            paddingBottom: "12px",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            borderRadius: "12px",
-            fontSize: "14px",
-            fontWeight: "600",
-            textTransform: "uppercase",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(255,180,171,0.1)";
-            e.currentTarget.style.color = "#ffb4ab";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "#c4c6cf";
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: "32px", marginBottom: "4px" }}
-          >
-            logout
-          </span>
-          <span>Salir</span>
-        </button>
-      </nav>
+       {/* Bottom Nav */}
+        <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "center", alignItems: "center", gap: "16px", paddingLeft: "40px", paddingRight: "40px", paddingTop: "20px", paddingBottom: "20px", background: "rgba(6,14,32,0.9)", backdropFilter: "blur(32px)", borderTop: "1px solid rgba(68,71,78,0.3)", boxShadow: "0px -10px 30px rgba(0,0,0,0.4)", borderTopLeftRadius: "12px", borderTopRightRadius: "12px", zIndex: 50 }}>
+          <button onClick={() => navigate(-1)} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#c4c6cf", paddingLeft: "48px", paddingRight: "48px", paddingTop: "12px", paddingBottom: "12px", background: "transparent", border: "none", cursor: "pointer", transition: "all 0.3s ease", borderRadius: "12px", fontSize: "14px", fontWeight: "600", textTransform: "uppercase" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(177,199,242,0.1)"; e.currentTarget.style.color = "#b1c7f2"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#c4c6cf"; }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>arrow_back</span>
+            <span>Regresar</span>
+          </button>
+          <div style={{ height: "32px", width: "1px", background: "rgba(68,71,78,0.3)" }} />
+          <button onClick={() => navigate("/")} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#c4c6cf", paddingLeft: "48px", paddingRight: "48px", paddingTop: "12px", paddingBottom: "12px", background: "transparent", border: "none", cursor: "pointer", transition: "all 0.3s ease", borderRadius: "12px", fontSize: "14px", fontWeight: "600", textTransform: "uppercase" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,180,171,0.1)"; e.currentTarget.style.color = "#ffb4ab"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#c4c6cf"; }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>logout</span>
+            <span>Salir</span>
+          </button>
+        </nav>
 
       {/* VISUAL DECORATION (AMBIENT LIGHT) */}
       <div

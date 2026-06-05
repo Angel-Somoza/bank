@@ -11,6 +11,8 @@ import AmountScreen from "./components/AmountScreen";
 import TransferScreen from "./components/TransferScreen";
 import DestinationSelectionScreen from "./components/DestinationSelectionScreen";
 import AddDestinationScreen from "./components/AddDestinationScreen";
+import ChangePinScreen from "./components/ChangePinScreen";
+
 
 
 
@@ -61,6 +63,8 @@ function App() {
           <Route path="/destination-selection" element={<DestinationSelectionScreen/>}
          />
          <Route path="/add-destination" element={<AddDestinationScreen />} 
+         />
+         <Route path="/change-pin" element={<ChangePinScreen />} 
          />
        </Routes>
     </BrowserRouter>

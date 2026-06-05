@@ -283,55 +283,32 @@ const TransferScreen = () => {
       />
 
       {/* HEADER */}
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 40px",
-          height: "80px",
-          background: "rgba(23,31,51,0.8)",
-          backdropFilter: "blur(40px)",
-          borderBottom: "1px solid rgba(68,71,78,0.2)",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          animation: "fadeInDown 0.8s ease-out forwards",
-        }}
-      >
-        <div
+       {/* Header */}
+        <header
           style={{
-            fontSize: "24px",
-            fontWeight: "800",
-            color: "#b1c7f2",
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '0 40px',
+            height: '80px',
+            background: 'rgba(23, 31, 51, 0.8)',
+            backdropFilter: 'blur(40px)',
+            borderBottom: '1px solid rgba(68, 71, 78, 0.2)',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            animation: 'fadeInDown 0.8s ease-out forwards',
           }}
         >
-          SECUREBANK
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "24px",
-            color: "#c4c6cf",
-          }}
-        >
-          <span className="material-symbols-outlined">wifi</span>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-            }}
-          >
-            <span className="material-symbols-outlined">schedule</span>
-            <span>{formatTime(time)}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '24px', fontWeight: 'bold', letterSpacing: '0.5px', color: '#b1c7f2' }}>
+              SECUREBANK
+            </span>
           </div>
-        </div>
-      </header>
+        </header>
+
 
       {/* MAIN */}
       <main
@@ -944,118 +921,22 @@ const TransferScreen = () => {
         Complete los datos para realizar la transferencia
       </div>
 
-      {/* BOTTOM NAVIGATION */}
-      <nav
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "16px",
-          paddingLeft: "40px",
-          paddingRight: "40px",
-          paddingTop: "20px",
-          paddingBottom: "20px",
-          background: "rgba(6,14,32,0.9)",
-          backdropFilter: "blur(32px)",
-          borderTop: "1px solid rgba(68,71,78,0.3)",
-          boxShadow: "0px -10px 30px rgba(0,0,0,0.4)",
-          borderTopLeftRadius: "12px",
-          borderTopRightRadius: "12px",
-          zIndex: 50,
-        }}
-      >
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#c4c6cf",
-            paddingLeft: "48px",
-            paddingRight: "48px",
-            paddingTop: "12px",
-            paddingBottom: "12px",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            borderRadius: "12px",
-            fontSize: "14px",
-            fontWeight: "600",
-            textTransform: "uppercase",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background =
-              "rgba(177,199,242,0.1)";
-            e.currentTarget.style.color = "#b1c7f2";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "#c4c6cf";
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: "32px", marginBottom: "4px" }}
-          >
-            cancel
-          </span>
-          <span>Cancelar</span>
-        </button>
-
-        <div
-          style={{
-            height: "32px",
-            width: "1px",
-            background: "rgba(68,71,78,0.3)",
-          }}
-        />
-
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#c4c6cf",
-            paddingLeft: "48px",
-            paddingRight: "48px",
-            paddingTop: "12px",
-            paddingBottom: "12px",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            borderRadius: "12px",
-            fontSize: "14px",
-            fontWeight: "600",
-            textTransform: "uppercase",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background =
-              "rgba(255,180,171,0.1)";
-            e.currentTarget.style.color = "#ffb4ab";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "#c4c6cf";
-          }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: "32px", marginBottom: "4px" }}
-          >
-            logout
-          </span>
-          <span>Salir</span>
-        </button>
-      </nav>
+       {/* Bottom Nav */}
+        <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, display: "flex", justifyContent: "center", alignItems: "center", gap: "16px", paddingLeft: "40px", paddingRight: "40px", paddingTop: "20px", paddingBottom: "20px", background: "rgba(6,14,32,0.9)", backdropFilter: "blur(32px)", borderTop: "1px solid rgba(68,71,78,0.3)", boxShadow: "0px -10px 30px rgba(0,0,0,0.4)", borderTopLeftRadius: "12px", borderTopRightRadius: "12px", zIndex: 50 }}>
+          <button onClick={() => navigate(-1)} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#c4c6cf", paddingLeft: "48px", paddingRight: "48px", paddingTop: "12px", paddingBottom: "12px", background: "transparent", border: "none", cursor: "pointer", transition: "all 0.3s ease", borderRadius: "12px", fontSize: "14px", fontWeight: "600", textTransform: "uppercase" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(177,199,242,0.1)"; e.currentTarget.style.color = "#b1c7f2"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#c4c6cf"; }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>arrow_back</span>
+            <span>Regresar</span>
+          </button>
+          <div style={{ height: "32px", width: "1px", background: "rgba(68,71,78,0.3)" }} />
+          <button onClick={() => navigate("/")} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "#c4c6cf", paddingLeft: "48px", paddingRight: "48px", paddingTop: "12px", paddingBottom: "12px", background: "transparent", border: "none", cursor: "pointer", transition: "all 0.3s ease", borderRadius: "12px", fontSize: "14px", fontWeight: "600", textTransform: "uppercase" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,180,171,0.1)"; e.currentTarget.style.color = "#ffb4ab"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#c4c6cf"; }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>logout</span>
+            <span>Salir</span>
+          </button>
+        </nav>
     </div>
   );
 };
