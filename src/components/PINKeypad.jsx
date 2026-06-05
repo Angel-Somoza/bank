@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "./LoadingScreen";
+
 
 const PINKeypad = () => {
   const navigate = useNavigate();
-
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +27,7 @@ const PINKeypad = () => {
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:3000/api/cajero/login",
+        "https://cajero-online.onrender.com/api/cajero/login",
         {
           method: "POST",
           headers: {
@@ -105,7 +106,9 @@ const PINKeypad = () => {
     alignItems: "center",
     justifyContent: "center",
   };
-
+if (loading) {
+  return <LoadingScreen />;
+}
   return (
     <div
       style={{
@@ -225,26 +228,26 @@ const PINKeypad = () => {
           </button>
 
           {/* CONFIRM */}
-          <button
-            onClick={handleConfirm}
-            disabled={pin.length !== 4 || loading}
-            style={{
-              ...keypadButtonStyle,
-              background:
-                pin.length === 4
-                  ? "#4ae176"
-                  : "rgba(74,225,118,0.2)",
+     <button
+  onClick={handleConfirm}
+  disabled={pin.length !== 4 || loading}
+  style={{
+    ...keypadButtonStyle,
+    background:
+      pin.length === 4
+        ? "#4ae176"
+        : "rgba(74,225,118,0.2)",
 
-              color:
-                pin.length === 4
-                  ? "#0b1326"
-                  : "#4ae176",
+    color:
+      pin.length === 4
+        ? "#0b1326"
+        : "#4ae176",
 
-              fontWeight: "800",
-            }}
-          >
-            {loading ? "..." : "✓"}
-          </button>
+    fontWeight: "800",
+  }}
+>
+  ✓
+</button>
         </div>
       </main>
 

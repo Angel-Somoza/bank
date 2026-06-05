@@ -6,6 +6,8 @@ import AccountSelection from "./components/AccountSelection";
 import ATMWithdrawalScreen from "./components/ATMWithdrawalScreen";
 import ATMSuccessScreen from "./components/ATMSuccessScreen";
 import BalanceScreen from "./components/BalanceScreen";
+import MovementsScreen from "./components/MovementsScreen";
+import AmountScreen from "./components/AmountScreen";
 
 
 import "./index.css";
@@ -45,7 +47,11 @@ function App() {
         />
         <Route path="/balance" element={<BalanceScreen />} 
         />
-      </Routes>
+        <Route path="/movements" element={<MovementsScreen />} 
+        />
+        <Route
+         path="/amount"element={<AmountScreen />}/>
+       </Routes>
     </BrowserRouter>
   );
 }

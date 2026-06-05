@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "./LoadingScreen";
 
 const MainBank = () => {
   const navigate = useNavigate();
-
+const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(new Date());
   const usuario = JSON.parse(
     localStorage.getItem("usuario")) || {};
@@ -13,13 +14,55 @@ const MainBank = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-  const token = localStorage.getItem("token");
+useEffect(() => {
 
-  if (!token) {
-    alert("Sesión no encontrada");
-    navigate("/");
-  }
+  window.history.pushState(null, "", window.location.href);
+
+  const handleBackButton = () => {
+
+    const confirmLogout = window.confirm(
+      "¿Deseas cerrar sesión?"
+    );
+
+    if (confirmLogout) {
+
+      setLoading(true);
+
+      setTimeout(() => {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+
+        navigate("/");
+
+      }, 2500);
+
+    } else {
+
+      window.history.pushState(
+        null,
+        "",
+        window.location.href
+      );
+
+    }
+
+  };
+
+  window.addEventListener(
+    "popstate",
+    handleBackButton
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      "popstate",
+      handleBackButton
+    );
+
+  };
+
 }, [navigate]);
   const formatTime = (date) => {
     return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
@@ -44,7 +87,9 @@ const MainBank = () => {
     { icon: 'lock_reset', label: 'Cambio de Clave', desc: 'Actualiza tu PIN de seguridad', color: '#b1c7f2', delay: 0.5 },
     { icon: 'grid_view', label: 'Otros Servicios', desc: 'Donaciones, recargas y más', color: '#b1c7f2', delay: 0.6 },
   ];
-
+  if (loading) {
+  return <LoadingScreen />;
+}
   return (
     <div style={{ background: '#0b1326', color: '#dae2fd', minHeight: '100vh', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
@@ -297,8 +342,29 @@ const MainBank = () => {
 >
   {/* REGRESAR */}
   <button
-    onClick={() => navigate(-1)}
-    style={{
+onClick={async () => {
+
+    const confirmLogout = window.confirm(
+      "¿Deseas cerrar sesión?"
+    );
+
+    if (confirmLogout) {
+
+      setLoading(true);
+
+      // simulación de carga
+      setTimeout(() => {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+
+        navigate("/");
+
+      }, 2500);
+
+    }
+
+  }}    style={{
       display: "flex",
       flexDirection: "column",
       alignItems: "center",

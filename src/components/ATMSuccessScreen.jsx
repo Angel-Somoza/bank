@@ -166,32 +166,29 @@ const generarComprobantePDF = () => {
         }}
       />
 
-      {/* HEADER */}
+         {/* Header */}
       <header
         style={{
-          height: "70px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 24px",
-          background:
-            "rgba(23,31,51,0.82)",
-          backdropFilter: "blur(24px)",
-          borderBottom:
-            "1px solid rgba(68,71,78,0.2)",
-          position: "sticky",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '0 40px',
+          height: '80px',
+          background: 'rgba(23, 31, 51, 0.8)',
+          backdropFilter: 'blur(40px)',
+          borderBottom: '1px solid rgba(68, 71, 78, 0.2)',
+          position: 'fixed',
           top: 0,
-          zIndex: 20,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          animation: 'fadeInDown 0.8s ease-out forwards',
         }}
       >
-        <div
-          style={{
-            fontSize: "22px",
-            fontWeight: "800",
-            color: "#b1c7f2",
-          }}
-        >
-          SECUREBANK
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '24px', fontWeight: 'bold', letterSpacing: '0.5px', color: '#b1c7f2' }}>
+            SECUREBANK
+          </span>
         </div>
       </header>
 
