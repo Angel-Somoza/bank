@@ -4,66 +4,37 @@ import LoadingScreen from "./LoadingScreen";
 
 const MainBank = () => {
   const navigate = useNavigate();
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [time, setTime] = useState(new Date());
-  const usuario = JSON.parse(
-    localStorage.getItem("usuario")) || {};
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const usuario = JSON.parse(localStorage.getItem("usuario")) || {};
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
 
-  window.history.pushState(null, "", window.location.href);
+    const handleBackButton = () => {
+      const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
+      if (confirmLogout) {
+        setLoading(true);
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          navigate("/");
+        }, 2500);
+      } else {
+        window.history.pushState(null, "", window.location.href);
+      }
+    };
 
-  const handleBackButton = () => {
+    window.addEventListener("popstate", handleBackButton);
+    return () => window.removeEventListener("popstate", handleBackButton);
+  }, [navigate]);
 
-    const confirmLogout = window.confirm(
-      "¿Deseas cerrar sesión?"
-    );
-
-    if (confirmLogout) {
-
-      setLoading(true);
-
-      setTimeout(() => {
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("usuario");
-
-        navigate("/");
-
-      }, 2500);
-
-    } else {
-
-      window.history.pushState(
-        null,
-        "",
-        window.location.href
-      );
-
-    }
-
-  };
-
-  window.addEventListener(
-    "popstate",
-    handleBackButton
-  );
-
-  return () => {
-
-    window.removeEventListener(
-      "popstate",
-      handleBackButton
-    );
-
-  };
-
-}, [navigate]);
   const formatTime = (date) => {
     return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   };
@@ -80,16 +51,18 @@ useEffect(() => {
   };
 
   const menuItems = [
-    { icon: 'payments', label: 'Retiro de Efectivo', desc: 'Dispensa billetes de forma rápida', color: '#4ae176', delay: 0.1 },
+    { icon: 'payments', label: 'Retiro de Efectivo', desc: 'Dispensa billetes de forma rápida', color: '#b1c7f2', delay: 0.1 },
     { icon: 'account_balance_wallet', label: 'Consulta de Saldo', desc: 'Verifica tus cuentas y ahorros', color: '#b1c7f2', delay: 0.2 },
-    { icon: 'sync_alt', label: 'Transferencias', desc: 'Envía dinero a otras cuentas', color: '#b7c8e1', delay: 0.3 },
+    { icon: 'sync_alt', label: 'Transferencias', desc: 'Envía dinero a otras cuentas', color: '#b1c7f2', delay: 0.3 },
     { icon: 'receipt_long', label: 'Pagos', desc: 'Servicios, tarjetas y convenios', color: '#b1c7f2', delay: 0.4 },
     { icon: 'lock_reset', label: 'Cambio de Clave', desc: 'Actualiza tu PIN de seguridad', color: '#b1c7f2', delay: 0.5 },
     { icon: 'grid_view', label: 'Otros Servicios', desc: 'Donaciones, recargas y más', color: '#b1c7f2', delay: 0.6 },
   ];
+
   if (loading) {
-  return <LoadingScreen />;
-}
+    return <LoadingScreen />;
+  }
+
   return (
     <div style={{ background: '#0b1326', color: '#dae2fd', minHeight: '100vh', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
@@ -184,7 +157,7 @@ useEffect(() => {
           </p>
         </div>
 
-        {/* Bento Grid */}
+        {/* Bento Grid - Cards con efecto hover como AccountSelection */}
         <div
           style={{
             display: 'grid',
@@ -194,279 +167,250 @@ useEffect(() => {
             maxWidth: '1200px',
           }}
         >
-          {menuItems.map((item, index) => (
-  <button
-    key={index}
-    onClick={() => {
-      
-      if (item.label === 'Retiro de Efectivo') {
-        navigate("/account-selection");
-      }
-      if (item.label === 'Consulta de Saldo') {
-        navigate("/balance");
-      }
-      
-    }}
-    style={{
-      ...glassStyle,
-      padding: '32px',
-      borderRadius: '12px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      gap: '16px',
-      textAlign: 'left',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      borderLeft: `4px solid ${index === 0 ? '#4ae176' : 'transparent'}`,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-      animation: `staggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-      animationDelay: `${item.delay}s`,
-      opacity: 0,
-      animationFillMode: 'forwards',
-      border: '1px solid rgba(142, 144, 153, 0.15)',
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.boxShadow =
-        `0 0 30px 2px rgba(177, 199, 242, 0.15)`;
+          {menuItems.map((item, index) => {
+            const isHovered = hoveredCard === index;
+            
+            return (
+              <button
+                key={index}
+                onClick={() => {
+                  if (item.label === 'Retiro de Efectivo') {
+                    navigate("/account-selection");
+                  }
+                  if (item.label === 'Consulta de Saldo') {
+                    navigate("/balance");
+                  }
+                  if(item.label === "Transferencias"){
+                    navigate("/transfer")
+                  }
+                }}
+                onMouseEnter={() => setHoveredCard(index)}
+                onMouseLeave={() => setHoveredCard(null)}
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  padding: "32px",
+                  borderRadius: "28px",
+                  border: isHovered ? "1px solid rgba(74,225,118,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                  background: isHovered ? "#4ae176" : "rgba(23,31,51,0.6)",
+                  backdropFilter: "blur(20px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "16px",
+                  textAlign: "left",
+                  cursor: "pointer",
+                  transition: "all 0.35s ease",
+                  boxShadow: isHovered ? "0 0 40px rgba(74,225,118,0.25)" : "0 10px 30px rgba(0,0,0,0.3)",
+                  transform: isHovered ? "translateY(-8px) scale(1.02)" : "translateY(0px) scale(1)",
+                  animation: `staggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+                  animationDelay: `${item.delay}s`,
+                  opacity: 0,
+                  animationFillMode: "forwards",
+                }}
+              >
+                {/* BG Icon */}
+                <div style={{ position: "absolute", top: 20, right: 20, opacity: isHovered ? 0.2 : 0.08 }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: "100px", color: isHovered ? "#002109" : item.color }}>
+                    {item.icon}
+                  </span>
+                </div>
 
-      e.currentTarget.style.transform =
-        'translateY(-4px) scale(1.02)';
+                {/* Icon */}
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 2,
+                    background: isHovered ? "rgba(0,0,0,0.08)" : `${item.color}33`,
+                    padding: "16px",
+                    borderRadius: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: "32px",
+                      color: isHovered ? "#002109" : item.color,
+                      transition: "transform 0.3s ease",
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+                </div>
 
-      e.currentTarget.style.background =
-        'rgba(34, 42, 61, 0.8)';
+                {/* Text */}
+                <div style={{ position: "relative", zIndex: 2 }}>
+                  <h2
+                    style={{
+                      fontSize: "24px",
+                      lineHeight: "1.4",
+                      fontWeight: "600",
+                      color: isHovered ? "#002109" : "#dae2fd",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {item.label}
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: "16px",
+                      lineHeight: "1.2",
+                      letterSpacing: "0.05em",
+                      fontWeight: "500",
+                      color: isHovered ? "rgba(0,33,9,0.8)" : "#c4c6cf",
+                    }}
+                  >
+                    {item.desc}
+                  </p>
+                </div>
 
-      e.currentTarget.style.borderColor =
-        'rgba(177, 199, 242, 0.3)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.boxShadow =
-        '0 10px 30px rgba(0,0,0,0.3)';
-
-      e.currentTarget.style.transform =
-        'translateY(0) scale(1)';
-
-      e.currentTarget.style.background =
-        glassStyle.background;
-
-      e.currentTarget.style.borderColor =
-        'rgba(142, 144, 153, 0.15)';
-    }}
-    onMouseDown={(e) => {
-      e.currentTarget.style.transform =
-        'scale(0.96)';
-    }}
-    onMouseUp={(e) => {
-      e.currentTarget.style.transform =
-        'translateY(-4px) scale(1.02)';
-    }}
-  >
-    {/* Icon */}
-    <div
-      style={{
-        background: `${item.color}33`,
-        padding: '16px',
-        borderRadius: '8px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all 0.3s ease',
-      }}
-    >
-      <span
-        className="material-symbols-outlined"
-        style={{
-          fontSize: '32px',
-          color: item.color,
-          transition: 'transform 0.3s ease',
-        }}
-      >
-        {item.icon}
-      </span>
-    </div>
-
-    {/* Text */}
-    <div>
-      <h2
-        style={{
-          fontSize: '24px',
-          lineHeight: '1.4',
-          fontWeight: '600',
-          color: '#dae2fd',
-          marginBottom: '4px',
-        }}
-      >
-        {item.label}
-      </h2>
-
-      <p
-        style={{
-          fontSize: '16px',
-          lineHeight: '1.2',
-          letterSpacing: '0.05em',
-          fontWeight: '600',
-          color: '#c4c6cf',
-        }}
-      >
-        {item.desc}
-      </p>
-    </div>
-  </button>
-))}
+                {/* Arrow indicator */}
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 2,
+                    marginTop: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    color: isHovered ? "#002109" : item.color,
+                    fontWeight: "600",
+                    fontSize: "14px",
+                  }}
+                >
+                  <span>SELECCIONAR</span>
+                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+                    arrow_forward
+                  </span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </main>
 
       {/* Bottom Navigation */}
-<nav
-  style={{
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "16px",
-    paddingLeft: "40px",
-    paddingRight: "40px",
-    paddingTop: "20px",
-    paddingBottom: "20px",
-    background: "rgba(6, 14, 32, 0.9)",
-    backdropFilter: "blur(32px)",
-    borderTop: "1px solid rgba(68, 71, 78, 0.3)",
-    boxShadow: "0px -10px 30px rgba(0,0,0,0.4)",
-    borderTopLeftRadius: "12px",
-    borderTopRightRadius: "12px",
-    zIndex: 50,
-  }}
->
-  {/* REGRESAR */}
-  <button
-onClick={async () => {
+      <nav
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "16px",
+          paddingLeft: "40px",
+          paddingRight: "40px",
+          paddingTop: "20px",
+          paddingBottom: "20px",
+          background: "rgba(6, 14, 32, 0.9)",
+          backdropFilter: "blur(32px)",
+          borderTop: "1px solid rgba(68, 71, 78, 0.3)",
+          boxShadow: "0px -10px 30px rgba(0,0,0,0.4)",
+          borderTopLeftRadius: "12px",
+          borderTopRightRadius: "12px",
+          zIndex: 50,
+        }}
+      >
+        {/* REGRESAR */}
+        <button
+          onClick={async () => {
+            const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
+            if (confirmLogout) {
+              setLoading(true);
+              setTimeout(() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("usuario");
+                navigate("/");
+              }, 2500);
+            }
+          }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#c4c6cf",
+            paddingLeft: "48px",
+            paddingRight: "48px",
+            paddingTop: "12px",
+            paddingBottom: "12px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            borderRadius: "12px",
+            fontSize: "14px",
+            fontWeight: "600",
+            textTransform: "uppercase",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(177, 199, 242, 0.1)";
+            e.currentTarget.style.color = "#b1c7f2";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "#c4c6cf";
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>
+            arrow_back
+          </span>
+          <span>Regresar</span>
+        </button>
 
-    const confirmLogout = window.confirm(
-      "¿Deseas cerrar sesión?"
-    );
+        {/* DIVIDER */}
+        <div
+          style={{
+            height: "32px",
+            width: "1px",
+            background: "rgba(68, 71, 78, 0.3)",
+          }}
+        />
 
-    if (confirmLogout) {
+        {/* SALIR */}
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#c4c6cf",
+            paddingLeft: "48px",
+            paddingRight: "48px",
+            paddingTop: "12px",
+            paddingBottom: "12px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            borderRadius: "12px",
+            fontSize: "14px",
+            fontWeight: "600",
+            textTransform: "uppercase",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255, 180, 171, 0.1)";
+            e.currentTarget.style.color = "#ffb4ab";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "#c4c6cf";
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: "32px", marginBottom: "4px" }}>
+            logout
+          </span>
+          <span>Salir</span>
+        </button>
+      </nav>
 
-      setLoading(true);
-
-      // simulación de carga
-      setTimeout(() => {
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("usuario");
-
-        navigate("/");
-
-      }, 2500);
-
-    }
-
-  }}    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#c4c6cf",
-      paddingLeft: "48px",
-      paddingRight: "48px",
-      paddingTop: "12px",
-      paddingBottom: "12px",
-      background: "transparent",
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      borderRadius: "12px",
-      fontSize: "14px",
-      fontWeight: "600",
-      textTransform: "uppercase",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background =
-        "rgba(177, 199, 242, 0.1)";
-      e.currentTarget.style.color = "#b1c7f2";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background =
-        "transparent";
-      e.currentTarget.style.color = "#c4c6cf";
-    }}
-  >
-    <span
-      className="material-symbols-outlined"
-      style={{
-        fontSize: "32px",
-        marginBottom: "4px",
-      }}
-    >
-      arrow_back
-    </span>
-
-    <span>Regresar</span>
-  </button>
-
-  {/* DIVIDER */}
-  <div
-    style={{
-      height: "32px",
-      width: "1px",
-      background:
-        "rgba(68, 71, 78, 0.3)",
-    }}
-  />
-
-  {/* SALIR */}
-  <button
-    onClick={() => navigate("/")}
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#c4c6cf",
-      paddingLeft: "48px",
-      paddingRight: "48px",
-      paddingTop: "12px",
-      paddingBottom: "12px",
-      background: "transparent",
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      borderRadius: "12px",
-      fontSize: "14px",
-      fontWeight: "600",
-      textTransform: "uppercase",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background =
-        "rgba(255, 180, 171, 0.1)";
-      e.currentTarget.style.color =
-        "#ffb4ab";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background =
-        "transparent";
-      e.currentTarget.style.color =
-        "#c4c6cf";
-    }}
-  >
-    <span
-      className="material-symbols-outlined"
-      style={{
-        fontSize: "32px",
-        marginBottom: "4px",
-      }}
-    >
-      logout
-    </span>
-
-    <span>Salir</span>
-  </button>
-</nav>
-
-      {}
       <style>{`
         @keyframes fadeInDown {
           0% {

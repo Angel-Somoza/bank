@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "./LoadingScreen";
+
 
 const MovementsScreen = () => {
 
@@ -138,11 +140,7 @@ const MovementsScreen = () => {
     };
 
     if (loading) {
-        return (
-            <div style={{ height: "100vh", background: "#0b1326", display: "flex", justifyContent: "center", alignItems: "center", color: "white", fontSize: "24px", fontWeight: "bold" }}>
-                Cargando movimientos...
-            </div>
-        );
+        return <LoadingScreen />;
     }
 
     return (

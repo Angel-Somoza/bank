@@ -8,6 +8,10 @@ import ATMSuccessScreen from "./components/ATMSuccessScreen";
 import BalanceScreen from "./components/BalanceScreen";
 import MovementsScreen from "./components/MovementsScreen";
 import AmountScreen from "./components/AmountScreen";
+import TransferScreen from "./components/TransferScreen";
+import DestinationSelectionScreen from "./components/DestinationSelectionScreen";
+import AddDestinationScreen from "./components/AddDestinationScreen";
+
 
 
 import "./index.css";
@@ -50,7 +54,14 @@ function App() {
         <Route path="/movements" element={<MovementsScreen />} 
         />
         <Route
-         path="/amount"element={<AmountScreen />}/>
+         path="/amount"element={<AmountScreen />}
+         />
+         <Route path="/transfer" element={<TransferScreen/>}
+         />
+          <Route path="/destination-selection" element={<DestinationSelectionScreen/>}
+         />
+         <Route path="/add-destination" element={<AddDestinationScreen />} 
+         />
        </Routes>
     </BrowserRouter>
   );

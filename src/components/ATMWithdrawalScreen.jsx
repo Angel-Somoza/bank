@@ -6,6 +6,7 @@ const ATMWithdrawalScreen = () => {
 
   const [showToast, setShowToast] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
+  const [hoveredOther, setHoveredOther] = useState(false);
   const cuentaSeleccionada = JSON.parse(localStorage.getItem("cuentaSeleccionada"));
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -90,7 +91,7 @@ const ATMWithdrawalScreen = () => {
       <div style={{ position: "fixed", top: "15%", left: "-120px", width: "420px", height: "420px", borderRadius: "50%", background: "rgba(74,225,118,0.12)", filter: "blur(120px)", animation: "float 8s ease-in-out infinite alternate", zIndex: 0 }} />
       <div style={{ position: "fixed", bottom: "10%", right: "-120px", width: "420px", height: "420px", borderRadius: "50%", background: "rgba(177,199,242,0.12)", filter: "blur(120px)", animation: "float 10s ease-in-out infinite alternate", animationDelay: "-5s", zIndex: 0 }} />
 
-         {/* Header */}
+      {/* Header */}
       <header
         style={{
           display: 'flex',
@@ -175,25 +176,34 @@ const ATMWithdrawalScreen = () => {
             );
           })}
 
-          {/* Otro monto */}
+          {/* Otro monto - Ahora con el mismo efecto hover */}
           <button
             onClick={() => navigate("/amount")}
+            onMouseEnter={() => setHoveredOther(true)}
+            onMouseLeave={() => setHoveredOther(false)}
             style={{
-              background: "rgba(23,31,51,0.55)", color: "#dae2fd",
-              border: "1px solid rgba(142,144,153,0.2)", borderRadius: "26px",
-              minHeight: "190px", padding: "30px", cursor: "pointer",
-              transition: "all 0.35s ease", boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+              position: "relative", overflow: "hidden",
+              background: hoveredOther ? "#4ae176" : "rgba(23,31,51,0.55)",
+              color: hoveredOther ? "#002109" : "#dae2fd",
+              backdropFilter: "blur(20px)",
+              border: hoveredOther ? "1px solid #4ae176" : "1px solid rgba(142,144,153,0.2)",
+              borderRadius: "26px", minHeight: "190px", padding: "30px", cursor: "pointer",
+              transition: "all 0.35s ease", 
+              boxShadow: hoveredOther ? "0 0 40px rgba(74,225,118,0.45)" : "0 10px 30px rgba(0,0,0,0.3)",
+              transform: hoveredOther ? "translateY(-6px) scale(1.03)" : "translateY(0px) scale(1)",
               animation: `staggerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
               animationDelay: `${0.1 + amounts.length * 0.08}s`,
               opacity: 0, animationFillMode: "forwards",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(34,42,61,0.8)"; e.currentTarget.style.transform = "translateY(-6px) scale(1.03)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(23,31,51,0.55)"; e.currentTarget.style.transform = "translateY(0px) scale(1)"; }}
           >
-            <div style={{ fontSize: "34px", marginBottom: "16px" }}>Otro Monto</div>
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", opacity: 0.9 }}>
-              <span className="material-symbols-outlined">dialpad</span>
-              Entrada personalizada
+            <div style={{ position: "relative", zIndex: 2 }}>
+              <div style={{ fontSize: "34px", fontWeight: "800", marginBottom: "16px", color: hoveredOther ? "#002109" : "#dae2fd" }}>
+                Otro Monto
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "16px" }}>
+                <span className="material-symbols-outlined" style={{ color: hoveredOther ? "#003915" : "#4ae176" }}>dialpad</span>
+                Entrada personalizada
+              </div>
             </div>
           </button>
         </div>

@@ -2,13 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "./LoadingScreen";
 
-
 const PINKeypad = () => {
   const navigate = useNavigate();
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
 
   const maxPinLength = 4;
+
+  // Mapeo de PINs a usuarios
+  const pinToUser = {
+    "1111": "axelavila",
+    "2222": "mariolopez",
+    "1234": "angel"
+  };
 
   const handleNumberClick = (num) => {
     if (pin.length < maxPinLength) {
@@ -23,6 +29,15 @@ const PINKeypad = () => {
   const handleConfirm = async () => {
     if (pin.length !== maxPinLength) return;
 
+    // Obtener el username según el PIN ingresado
+    const username = pinToUser[pin];
+    
+    if (!username) {
+      alert("PIN incorrecto");
+      setPin("");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -33,9 +48,8 @@ const PINKeypad = () => {
           headers: {
             "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
-            username: "angel",
+            username: username,
             password: pin,
           }),
         }
@@ -47,6 +61,7 @@ const PINKeypad = () => {
 
       if (!response.ok) {
         alert(data.message || "Error al iniciar sesión");
+        setPin("");
         return;
       }
 
@@ -70,6 +85,7 @@ const PINKeypad = () => {
     } catch (error) {
       console.error(error);
       alert("Error conectando al servidor");
+      setPin("");
     } finally {
       setLoading(false);
     }
@@ -106,9 +122,11 @@ const PINKeypad = () => {
     alignItems: "center",
     justifyContent: "center",
   };
-if (loading) {
-  return <LoadingScreen />;
-}
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div
       style={{
@@ -228,160 +246,154 @@ if (loading) {
           </button>
 
           {/* CONFIRM */}
-     <button
-  onClick={handleConfirm}
-  disabled={pin.length !== 4 || loading}
-  style={{
-    ...keypadButtonStyle,
-    background:
-      pin.length === 4
-        ? "#4ae176"
-        : "rgba(74,225,118,0.2)",
-
-    color:
-      pin.length === 4
-        ? "#0b1326"
-        : "#4ae176",
-
-    fontWeight: "800",
-  }}
->
-  ✓
-</button>
+          <button
+            onClick={handleConfirm}
+            disabled={pin.length !== 4 || loading}
+            style={{
+              ...keypadButtonStyle,
+              background:
+                pin.length === 4
+                  ? "#4ae176"
+                  : "rgba(74,225,118,0.2)",
+              color:
+                pin.length === 4
+                  ? "#0b1326"
+                  : "#4ae176",
+              fontWeight: "800",
+            }}
+          >
+            ✓
+          </button>
         </div>
       </main>
 
-
       {/* Bottom Navigation */}
-<nav
-  style={{
-    position: "fixed",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "16px",
-    paddingLeft: "40px",
-    paddingRight: "40px",
-    paddingTop: "20px",
-    paddingBottom: "20px",
-    background: "rgba(6, 14, 32, 0.9)",
-    backdropFilter: "blur(32px)",
-    borderTop: "1px solid rgba(68, 71, 78, 0.3)",
-    boxShadow: "0px -10px 30px rgba(0,0,0,0.4)",
-    borderTopLeftRadius: "12px",
-    borderTopRightRadius: "12px",
-    zIndex: 50,
-  }}
->
-  {/* REGRESAR */}
-  <button
-    onClick={() => navigate(-1)}
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#c4c6cf",
-      paddingLeft: "48px",
-      paddingRight: "48px",
-      paddingTop: "12px",
-      paddingBottom: "12px",
-      background: "transparent",
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      borderRadius: "12px",
-      fontSize: "14px",
-      fontWeight: "600",
-      textTransform: "uppercase",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background =
-        "rgba(177, 199, 242, 0.1)";
-      e.currentTarget.style.color = "#b1c7f2";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background =
-        "transparent";
-      e.currentTarget.style.color = "#c4c6cf";
-    }}
-  >
-    <span
-      className="material-symbols-outlined"
-      style={{
-        fontSize: "32px",
-        marginBottom: "4px",
-      }}
-    >
-      arrow_back
-    </span>
+      <nav
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "16px",
+          paddingLeft: "40px",
+          paddingRight: "40px",
+          paddingTop: "20px",
+          paddingBottom: "20px",
+          background: "rgba(6, 14, 32, 0.9)",
+          backdropFilter: "blur(32px)",
+          borderTop: "1px solid rgba(68, 71, 78, 0.3)",
+          boxShadow: "0px -10px 30px rgba(0,0,0,0.4)",
+          borderTopLeftRadius: "12px",
+          borderTopRightRadius: "12px",
+          zIndex: 50,
+        }}
+      >
+        {/* REGRESAR */}
+        <button
+          onClick={() => navigate(-1)}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#c4c6cf",
+            paddingLeft: "48px",
+            paddingRight: "48px",
+            paddingTop: "12px",
+            paddingBottom: "12px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            borderRadius: "12px",
+            fontSize: "14px",
+            fontWeight: "600",
+            textTransform: "uppercase",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              "rgba(177, 199, 242, 0.1)";
+            e.currentTarget.style.color = "#b1c7f2";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              "transparent";
+            e.currentTarget.style.color = "#c4c6cf";
+          }}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{
+              fontSize: "32px",
+              marginBottom: "4px",
+            }}
+          >
+            arrow_back
+          </span>
+          <span>Regresar</span>
+        </button>
 
-    <span>Regresar</span>
-  </button>
+        {/* DIVIDER */}
+        <div
+          style={{
+            height: "32px",
+            width: "1px",
+            background:
+              "rgba(68, 71, 78, 0.3)",
+          }}
+        />
 
-  {/* DIVIDER */}
-  <div
-    style={{
-      height: "32px",
-      width: "1px",
-      background:
-        "rgba(68, 71, 78, 0.3)",
-    }}
-  />
-
-  {/* SALIR */}
-  <button
-    onClick={() => navigate("/")}
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#c4c6cf",
-      paddingLeft: "48px",
-      paddingRight: "48px",
-      paddingTop: "12px",
-      paddingBottom: "12px",
-      background: "transparent",
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      borderRadius: "12px",
-      fontSize: "14px",
-      fontWeight: "600",
-      textTransform: "uppercase",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background =
-        "rgba(255, 180, 171, 0.1)";
-      e.currentTarget.style.color =
-        "#ffb4ab";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background =
-        "transparent";
-      e.currentTarget.style.color =
-        "#c4c6cf";
-    }}
-  >
-    <span
-      className="material-symbols-outlined"
-      style={{
-        fontSize: "32px",
-        marginBottom: "4px",
-      }}
-    >
-      logout
-    </span>
-
-    <span>Salir</span>
-  </button>
-</nav>
+        {/* SALIR */}
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#c4c6cf",
+            paddingLeft: "48px",
+            paddingRight: "48px",
+            paddingTop: "12px",
+            paddingBottom: "12px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            borderRadius: "12px",
+            fontSize: "14px",
+            fontWeight: "600",
+            textTransform: "uppercase",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background =
+              "rgba(255, 180, 171, 0.1)";
+            e.currentTarget.style.color =
+              "#ffb4ab";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background =
+              "transparent";
+            e.currentTarget.style.color =
+              "#c4c6cf";
+          }}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{
+              fontSize: "32px",
+              marginBottom: "4px",
+            }}
+          >
+            logout
+          </span>
+          <span>Salir</span>
+        </button>
+      </nav>
     </div>
-    
   );
 };
 

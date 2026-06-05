@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "./LoadingScreen";
+
 
 const BalanceScreen = () => {
     const navigate = useNavigate();
@@ -49,13 +51,9 @@ const BalanceScreen = () => {
         obtenerCuentas();
     }, [navigate]);
 
-    if (loading) {
-        return (
-            <div style={{ minHeight: "100vh", background: "#0b1326", display: "flex", justifyContent: "center", alignItems: "center", color: "white", fontSize: "32px", fontWeight: "bold" }}>
-                Cargando cuentas...
-            </div>
-        );
-    }
+     if (loading) {
+      return <LoadingScreen />;
+  }
 
     return (
         <div style={{ minHeight: "100vh", background: "#0b1326", color: "#dae2fd", fontFamily: "Inter, sans-serif", position: "relative", overflow: "hidden" }}>
