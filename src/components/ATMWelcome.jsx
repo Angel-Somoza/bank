@@ -353,9 +353,10 @@ if (!normalCard || !asciiCard || !btn) {
         const img = document.createElement("img");
 
         img.className = "card-image";
+        
 
         img.src =
-          "https://cdn.prod.website-files.com/68789c86c8bc802d61932544/689f20b55e654d1341fb06f8_4.1.png";
+          "/cards/image.png";
 
         img.alt = "Credit Card";
 
