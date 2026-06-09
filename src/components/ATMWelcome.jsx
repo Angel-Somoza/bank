@@ -1,667 +1,1267 @@
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useRef } from "react";
+import * as THREE from "three";
+import "./styles.css";
 import { useNavigate } from "react-router-dom";
-
-const glassStyle = {
-  background: 'rgba(23, 31, 51, 0.7)',
-  backdropFilter: 'blur(20px)',
-  WebkitBackdropFilter: 'blur(20px)',
-  border: '1px solid rgba(142, 144, 153, 0.1)',
-};
 
 const ATMWelcome = () => {
   const navigate = useNavigate();
-
-  const [cardInserted, setCardInserted] = useState(false);
-  const [showError, setShowError] = useState(false);
+  const cardStreamRef = useRef(null);
+  const cardLineRef = useRef(null);
+  const speedValueRef = useRef(null);
+  const particleCanvasRef = useRef(null);
+  const scannerCanvasRef = useRef(null);
+  const insertBtnRef = useRef(null);
 
   useEffect(() => {
-    let timer;
+    class CardStreamController {
+      constructor() {
+        this.container = cardStreamRef.current;
+        this.cardLine = cardLineRef.current;
+if (this.speedEl) {
+  this.speedEl.textContent = "";
+}
+        this.position = 150;
+        this.velocity = 0;
+        this.direction = 1;
+        this.isAnimating = true;
+        this.isDragging = false;
 
-    if (showError) {
-      timer = setTimeout(() => {
-        setShowError(false);
-      }, 3000);
+        this.lastTime = performance.now();
+        this.lastMouseY = 0;
+        this.friction = 0.95;
+        this.minVelocity = 0;
+
+        this.containerHeight = 0;
+        this.cardLineHeight = 0;
+
+        this.init();
+      }
+
+      init() {
+        this.populateCardLine();
+        this.calculateDimensions();
+        this.setupEventListeners();
+        this.updateCardPosition();
+        this.animate();
+        this.startPeriodicUpdates();
+      }
+
+      calculateDimensions() {
+        this.containerHeight = window.innerHeight;
+        const cardHeight = 250;
+        const cardGap = 60;
+        const cardCount = this.cardLine.children.length;
+        this.cardLineHeight = (cardHeight + cardGap) * cardCount;
+      }
+
+      setupEventListeners() {
+        this.cardLine.addEventListener("mousedown", (e) =>
+          this.startDrag(e)
+        );
+
+        document.addEventListener("mousemove", (e) => this.onDrag(e));
+
+        document.addEventListener("mouseup", () => this.endDrag());
+
+        this.cardLine.addEventListener(
+          "touchstart",
+          (e) => this.startDrag(e.touches[0]),
+          { passive: false }
+        );
+
+        document.addEventListener(
+          "touchmove",
+          (e) => this.onDrag(e.touches[0]),
+          { passive: false }
+        );
+
+        document.addEventListener("touchend", () => this.endDrag());
+
+        this.cardLine.addEventListener("wheel", (e) => this.onWheel(e));
+
+        this.cardLine.addEventListener("selectstart", (e) =>
+          e.preventDefault()
+        );
+
+        this.cardLine.addEventListener("dragstart", (e) =>
+          e.preventDefault()
+        );
+
+        window.addEventListener("resize", () =>
+          this.calculateDimensions()
+        );
+      }
+
+      startDrag(e) {
+        e.preventDefault();
+
+        this.isDragging = true;
+        this.isAnimating = false;
+        this.lastMouseY = e.clientY;
+
+        const transform = window.getComputedStyle(this.cardLine).transform;
+
+        if (transform !== "none") {
+          this.position = new DOMMatrix(transform).m42;
+        }
+
+        this.cardLine.classList.add("dragging");
+
+        document.body.style.userSelect = "none";
+        document.body.style.cursor = "grabbing";
+      }
+
+      onDrag(e) {
+        if (!this.isDragging) return;
+
+        e.preventDefault();
+
+        const deltaY = e.clientY - this.lastMouseY;
+
+        this.position += deltaY;
+        this.lastMouseY = e.clientY;
+
+        this.cardLine.style.transform = `translateY(${this.position}px)`;
+
+        this.updateCardClipping();
+      }
+
+      endDrag() {
+        if (!this.isDragging) return;
+
+        this.isDragging = false;
+        this.isAnimating = false;
+
+        this.cardLine.classList.remove("dragging");
+
+        document.body.style.userSelect = "";
+        document.body.style.cursor = "";
+      }
+
+      animate() {
+        const now = performance.now();
+        const deltaTime = (now - this.lastTime) / 1000;
+
+        this.lastTime = now;
+
+        if (this.isAnimating && !this.isDragging) {
+  this.velocity = Math.max(this.minVelocity, this.velocity);
+
+  this.position +=
+    this.velocity * this.direction * deltaTime;
+
+  this.updateCardPosition();
+}
+
+this.animationFrame =
+  requestAnimationFrame(() => this.animate());      }
+
+      updateCardPosition() {
+        const h = this.cardLineHeight;
+        const w = this.containerHeight;
+
+        if (this.position < -h) this.position = w;
+        if (this.position > w) this.position = -h;
+
+        this.cardLine.style.transform = `translateY(${this.position}px)`;
+
+        this.updateCardClipping();
+      }
+
+      onWheel(e) {
+        e.preventDefault();
+
+        this.position += e.deltaY > 0 ? 20 : -20;
+
+        this.updateCardPosition();
+      }
+
+      updateCardClipping() {
+        const scannerY = window.innerHeight / 2;
+        const scannerHeight = 8;
+
+        const scanTop = scannerY - scannerHeight / 2;
+        const scanBottom = scannerY + scannerHeight / 2;
+
+        let anyScanningActive = false;
+
+        document.querySelectorAll(".card-wrapper").forEach((wrapper) => {
+          const rect = wrapper.getBoundingClientRect();
+
+          const cardTop = rect.top;
+          const cardBottom = rect.bottom;
+          const cardHeight = rect.height;
+
+          const normalCard =
+            wrapper.querySelector(".card-normal");
+
+          const asciiCard =
+            wrapper.querySelector(".card-ascii");
+
+            const btn = insertBtnRef.current;
+
+if (!normalCard || !asciiCard || !btn) {
+  return;
+}
+
+          if (
+            cardTop < scanBottom &&
+            cardBottom > scanTop
+          ) {
+            anyScanningActive = true;
+
+            const intersectTop = Math.max(
+              scanTop - cardTop,
+              0
+            );
+
+            const intersectBottom = Math.min(
+              scanBottom - cardTop,
+              cardHeight
+            );
+
+            const clipTop =
+              (intersectTop / cardHeight) * 100;
+
+            const clipBottom =
+              (intersectBottom / cardHeight) * 100;
+
+            normalCard.style.setProperty(
+              "--clip-top",
+              `${clipTop}%`
+            );
+
+            asciiCard.style.setProperty(
+              "--clip-bottom",
+              `${clipBottom}%`
+            );
+
+            if (
+              !wrapper.hasAttribute("data-scanned") &&
+              intersectTop > 0
+            ) {
+              wrapper.setAttribute("data-scanned", "true");
+
+              const fx = document.createElement("div");
+
+              fx.style.cssText = `
+                position:absolute;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                background:linear-gradient(
+                  180deg,
+                  transparent,
+                  rgba(0,255,255,0.4),
+                  transparent
+                );
+                animation:scanEffectV 0.6s ease-out;
+                pointer-events:none;
+                z-index:5;
+              `;
+
+              wrapper.appendChild(fx);
+
+              setTimeout(() => {
+                fx.parentNode &&
+                  fx.parentNode.removeChild(fx);
+              }, 600);
+            }
+          } else {
+            if (cardBottom < scanTop) {
+              btn.style.display = "block";
+
+              normalCard.style.setProperty(
+                "--clip-top",
+                "100%"
+              );
+
+              asciiCard.style.setProperty(
+                "--clip-bottom",
+                "0%"
+              );
+            } else {
+              btn.style.display = "none";
+
+              normalCard.style.setProperty(
+                "--clip-top",
+                "0%"
+              );
+
+              asciiCard.style.setProperty(
+                "--clip-bottom",
+                "100%"
+              );
+            }
+
+            wrapper.removeAttribute("data-scanned");
+          }
+        });
+
+        if (window.setScannerScanning) {
+          window.setScannerScanning(anyScanningActive);
+        }
+      }
+
+      generateCode(width, height) {
+        let flow = "";
+
+        const total = width * height;
+
+        while (flow.length < total) {
+          flow += Math.random() > 0.5 ? "1" : "0";
+        }
+
+        let out = "";
+        let offset = 0;
+
+        for (let row = 0; row < height; row++) {
+          let line = flow.slice(offset, offset + width);
+
+          if (line.length < width) {
+            line = line.padEnd(width, "0");
+          }
+
+          out += line + (row < height - 1 ? "\n" : "");
+
+          offset += width;
+        }
+
+        return out;
+      }
+
+      calculateCodeDimensions(w, h) {
+        return {
+          width: Math.floor(w / 6),
+          height: Math.floor(h / 13),
+          fontSize: 11,
+          lineHeight: 13,
+        };
+      }
+
+      createCardWrapper() {
+        const wrapper = document.createElement("div");
+
+        wrapper.className = "card-wrapper";
+
+        const normalCard = document.createElement("div");
+
+        normalCard.className = "card card-normal";
+
+        const img = document.createElement("img");
+
+        img.className = "card-image";
+
+        img.src =
+          "https://cdn.prod.website-files.com/68789c86c8bc802d61932544/689f20b55e654d1341fb06f8_4.1.png";
+
+        img.alt = "Credit Card";
+
+        normalCard.appendChild(img);
+
+        const asciiCard = document.createElement("div");
+
+        asciiCard.className = "card card-ascii";
+
+        const asciiContent = document.createElement("div");
+
+        asciiContent.className = "ascii-content";
+
+        const {
+          width,
+          height,
+          fontSize,
+          lineHeight,
+        } = this.calculateCodeDimensions(400, 250);
+
+        asciiContent.style.fontSize = fontSize + "px";
+
+        asciiContent.style.lineHeight =
+          lineHeight + "px";
+
+        asciiContent.textContent =
+          this.generateCode(width, height);
+
+        asciiCard.appendChild(asciiContent);
+
+        wrapper.appendChild(normalCard);
+        wrapper.appendChild(asciiCard);
+
+        return wrapper;
+      }
+
+      updateAsciiContent() {
+        document.querySelectorAll(".ascii-content")
+          .forEach((c) => {
+            if (Math.random() < 0.15) {
+              const { width, height } =
+                this.calculateCodeDimensions(400, 250);
+
+              c.textContent =
+                this.generateCode(width, height);
+            }
+          });
+      }
+
+      populateCardLine() {
+        this.cardLine.innerHTML = "";
+
+        for (let i = 0; i < 1; i++) {
+          this.cardLine.appendChild(
+            this.createCardWrapper(i)
+          );
+        }
+      }
+
+      startPeriodicUpdates() {
+        setInterval(() => this.updateAsciiContent(), 200);
+
+        const loop = () => {
+          this.updateCardClipping();
+
+          requestAnimationFrame(loop);
+        };
+
+        loop();
+      }
     }
 
-    return () => clearTimeout(timer);
-  }, [showError]);
+    class ParticleSystem {
+      constructor() {
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.particles = null;
 
-  const handleCardClick = () => {
-    setCardInserted(prev => !prev);
-  };
+        this.particleCount = 400;
 
-  const handleSpanishClick = () => {
-    if (cardInserted) {
-      navigate("/pin");
-    } else {
-      setShowError(true);
+        this.canvas = particleCanvasRef.current;
+
+        this.init();
+      }
+
+      init() {
+        this.scene = new THREE.Scene();
+
+        this.camera = new THREE.OrthographicCamera(
+          -200,
+          200,
+          window.innerHeight / 2,
+          -window.innerHeight / 2,
+          1,
+          1000
+        );
+
+        this.camera.position.z = 100;
+
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: this.canvas,
+          alpha: true,
+          antialias: true,
+        });
+
+        this.renderer.setSize(400, window.innerHeight);
+
+        this.renderer.setClearColor(0x000000, 0);
+
+        this.createParticles();
+
+        this.animate();
+
+        window.addEventListener("resize", () =>
+          this.onWindowResize()
+        );
+      }
+
+      createParticles() {
+        const geometry = new THREE.BufferGeometry();
+
+        const positions = new Float32Array(
+          this.particleCount * 3
+        );
+
+        const colors = new Float32Array(
+          this.particleCount * 3
+        );
+
+        const velocities = new Float32Array(
+          this.particleCount
+        );
+
+        for (let i = 0; i < this.particleCount; i++) {
+          positions[i * 3] =
+            (Math.random() - 0.5) * 400;
+
+          positions[i * 3 + 1] =
+            (Math.random() - 0.5) *
+            window.innerHeight;
+
+          positions[i * 3 + 2] = 0;
+
+          colors[i * 3] =
+            colors[i * 3 + 1] =
+            colors[i * 3 + 2] =
+              1;
+
+          velocities[i] = Math.random() * 60 + 30;
+        }
+
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(positions, 3)
+        );
+
+        geometry.setAttribute(
+          "color",
+          new THREE.BufferAttribute(colors, 3)
+        );
+
+        this.velocities = velocities;
+
+        const material = new THREE.PointsMaterial({
+          color: 0x8b5cf6,
+          size: 2,
+          transparent: true,
+          opacity: 0.5,
+          blending: THREE.AdditiveBlending,
+        });
+
+        this.particles = new THREE.Points(
+          geometry,
+          material
+        );
+
+        this.scene.add(this.particles);
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+
+        if (this.particles) {
+          const pos =
+            this.particles.geometry.attributes.position
+              .array;
+
+          for (let i = 0; i < this.particleCount; i++) {
+            pos[i * 3] += this.velocities[i] * 0.016;
+
+            if (pos[i * 3] > 300) {
+              pos[i * 3] = -300;
+
+              pos[i * 3 + 1] =
+                (Math.random() - 0.5) *
+                window.innerHeight;
+            }
+
+            pos[i * 3 + 1] +=
+              Math.sin(Date.now() * 0.001 + i) * 0.3;
+          }
+
+          this.particles.geometry.attributes.position.needsUpdate =
+            true;
+        }
+
+        this.renderer.render(this.scene, this.camera);
+      }
+
+      onWindowResize() {
+        this.camera.top = window.innerHeight / 2;
+
+        this.camera.bottom =
+          -window.innerHeight / 2;
+
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize(400, window.innerHeight);
+      }
     }
-  };
+
+  class ParticleScanner {
+  constructor() {
+    this.canvas = scannerCanvasRef.current;
+    this.ctx = this.canvas.getContext("2d");
+
+    this.w = 500;
+    this.h = window.innerHeight;
+
+    this.lightBarY = this.h / 2;
+    this.lightBarWidth = 3;
+    this.fadeZone = 60;
+
+    this.intensity = 0.8;
+    this.maxParticles = 800;
+    this.baseIntensity = 0.8;
+    this.baseMaxParticles = 800;
+    this.baseFadeZone = 60;
+
+    this.scanTargetIntensity = 1.8;
+    this.scanTargetParticles = 2500;
+    this.scanTargetFadeZone = 35;
+
+    this.scanningActive = false;
+    this.currentIntensity = this.intensity;
+    this.currentMaxParticles = this.maxParticles;
+    this.currentFadeZone = this.fadeZone;
+    this.currentGlowIntensity = 1;
+    this.transitionSpeed = 0.05;
+
+    this.particles = [];
+    this.count = 0;
+
+    this.setupCanvas();
+    this.createGradientCache();
+    this.initParticles();
+    this.animate();
+
+    window.addEventListener("resize", () =>
+      this.onResize()
+    );
+  }
+
+  setupCanvas() {
+    this.canvas.width = this.w;
+    this.canvas.height = this.h;
+    this.canvas.style.width = this.w + "px";
+    this.canvas.style.height = this.h + "px";
+  }
+
+  onResize() {
+    this.h = window.innerHeight;
+    this.lightBarY = this.h / 2;
+    this.setupCanvas();
+  }
+
+  createGradientCache() {
+    this.gradientCanvas = document.createElement("canvas");
+
+    this.gradientCanvas.width = 16;
+    this.gradientCanvas.height = 16;
+
+    const ctx = this.gradientCanvas.getContext("2d");
+
+    const half = 8;
+
+    const g = ctx.createRadialGradient(
+      half,
+      half,
+      0,
+      half,
+      half,
+      half
+    );
+
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.3, "rgba(196,181,253,0.8)");
+    g.addColorStop(0.7, "rgba(139,92,246,0.4)");
+    g.addColorStop(1, "transparent");
+
+    ctx.fillStyle = g;
+
+    ctx.beginPath();
+
+    ctx.arc(half, half, half, 0, Math.PI * 2);
+
+    ctx.fill();
+  }
+
+  rf(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  createParticle() {
+    const ir =
+      this.intensity / this.baseIntensity;
+
+    const sm = 1 + (ir - 1) * 1.2;
+
+    const sz = 1 + (ir - 1) * 0.7;
+
+    return {
+      x: this.rf(0, this.w),
+
+      y:
+        this.lightBarY +
+        this.rf(
+          -this.lightBarWidth / 2,
+          this.lightBarWidth / 2
+        ),
+
+      vx: this.rf(-0.15, 0.15) * sm,
+
+      vy: this.rf(0.2, 1.0) * sm,
+
+      radius: this.rf(0.4, 1) * sz,
+
+      alpha: this.rf(0.6, 1),
+
+      decay:
+        this.rf(0.005, 0.025) *
+        (2 - ir * 0.5),
+
+      originalAlpha: 0,
+
+      life: 1.0,
+
+      time: 0,
+
+      twinkleSpeed:
+        this.rf(0.02, 0.08) * sm,
+
+      twinkleAmount: this.rf(0.1, 0.25),
+    };
+  }
+
+  initParticles() {
+    for (let i = 0; i < this.maxParticles; i++) {
+      const p = this.createParticle();
+
+      p.originalAlpha = p.alpha;
+
+      this.particles[++this.count] = p;
+    }
+  }
+
+  updateParticle(p) {
+    p.x += p.vx;
+
+    p.y += p.vy;
+
+    p.time++;
+
+    p.alpha =
+      p.originalAlpha * p.life +
+      Math.sin(p.time * p.twinkleSpeed) *
+        p.twinkleAmount;
+
+    p.life -= p.decay;
+
+    if (p.y > this.h + 10 || p.life <= 0) {
+      this.resetParticle(p);
+    }
+  }
+
+  resetParticle(p) {
+    p.x = this.rf(0, this.w);
+
+    p.y =
+      this.lightBarY +
+      this.rf(
+        -this.lightBarWidth / 2,
+        this.lightBarWidth / 2
+      );
+
+    p.vx = this.rf(-0.15, 0.15);
+
+    p.vy = this.rf(0.2, 1.0);
+
+    p.alpha = p.originalAlpha =
+      this.rf(0.6, 1);
+
+    p.life = 1.0;
+
+    p.time = 0;
+  }
+
+  drawParticle(p) {
+    if (p.life <= 0) return;
+
+    let fade = 1;
+
+    if (p.x < this.fadeZone) {
+      fade = p.x / this.fadeZone;
+    } else if (
+      p.x > this.w - this.fadeZone
+    ) {
+      fade =
+        (this.w - p.x) / this.fadeZone;
+    }
+
+    fade = Math.max(0, Math.min(1, fade));
+
+    this.ctx.globalAlpha = p.alpha * fade;
+
+    this.ctx.drawImage(
+      this.gradientCanvas,
+      p.x - p.radius,
+      p.y - p.radius,
+      p.radius * 2,
+      p.radius * 2
+    );
+  }
+
+  drawLightBar() {
+    const ctx = this.ctx;
+
+    const lw = this.lightBarWidth;
+
+    const y = this.lightBarY;
+
+    const hGrad =
+      ctx.createLinearGradient(0, 0, this.w, 0);
+
+    hGrad.addColorStop(
+      0,
+      "rgba(255,255,255,0)"
+    );
+
+    hGrad.addColorStop(
+      this.fadeZone / this.w,
+      "rgba(255,255,255,1)"
+    );
+
+    hGrad.addColorStop(
+      1 - this.fadeZone / this.w,
+      "rgba(255,255,255,1)"
+    );
+
+    hGrad.addColorStop(
+      1,
+      "rgba(255,255,255,0)"
+    );
+
+    ctx.globalCompositeOperation = "lighter";
+
+    this.currentGlowIntensity +=
+      (
+        (this.scanningActive ? 3.5 : 1) -
+        this.currentGlowIntensity
+      ) * this.transitionSpeed;
+
+    const gi = this.currentGlowIntensity;
+
+    const coreG =
+      ctx.createLinearGradient(
+        0,
+        y - lw / 2,
+        0,
+        y + lw / 2
+      );
+
+    coreG.addColorStop(
+      0,
+      "rgba(255,255,255,0)"
+    );
+
+    coreG.addColorStop(
+      0.5,
+      `rgba(255,255,255,${gi})`
+    );
+
+    coreG.addColorStop(
+      1,
+      "rgba(255,255,255,0)"
+    );
+
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = coreG;
+
+    ctx.beginPath();
+
+    ctx.roundRect(0, y - lw / 2, this.w, lw, 15);
+
+    ctx.fill();
+
+    const g1 =
+      ctx.createLinearGradient(
+        0,
+        y - lw * 2,
+        0,
+        y + lw * 2
+      );
+
+    g1.addColorStop(
+      0,
+      "rgba(139,92,246,0)"
+    );
+
+    g1.addColorStop(
+      0.5,
+      `rgba(196,181,253,${0.8 * gi})`
+    );
+
+    g1.addColorStop(
+      1,
+      "rgba(139,92,246,0)"
+    );
+
+    ctx.globalAlpha =
+      this.scanningActive ? 1.0 : 0.8;
+
+    ctx.fillStyle = g1;
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+      0,
+      y - lw * 2,
+      this.w,
+      lw * 4,
+      25
+    );
+
+    ctx.fill();
+
+    const g2 =
+      ctx.createLinearGradient(
+        0,
+        y - lw * 4,
+        0,
+        y + lw * 4
+      );
+
+    g2.addColorStop(
+      0,
+      "rgba(139,92,246,0)"
+    );
+
+    g2.addColorStop(
+      0.5,
+      `rgba(139,92,246,${0.4 * gi})`
+    );
+
+    g2.addColorStop(
+      1,
+      "rgba(139,92,246,0)"
+    );
+
+    ctx.globalAlpha =
+      this.scanningActive ? 0.8 : 0.6;
+
+    ctx.fillStyle = g2;
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+      0,
+      y - lw * 4,
+      this.w,
+      lw * 8,
+      35
+    );
+
+    ctx.fill();
+
+    if (this.scanningActive) {
+      const g3 =
+        ctx.createLinearGradient(
+          0,
+          y - lw * 8,
+          0,
+          y + lw * 8
+        );
+
+      g3.addColorStop(
+        0,
+        "rgba(139,92,246,0)"
+      );
+
+      g3.addColorStop(
+        0.5,
+        "rgba(139,92,246,0.2)"
+      );
+
+      g3.addColorStop(
+        1,
+        "rgba(139,92,246,0)"
+      );
+
+      ctx.globalAlpha = 0.6;
+
+      ctx.fillStyle = g3;
+
+      ctx.beginPath();
+
+      ctx.roundRect(
+        0,
+        y - lw * 8,
+        this.w,
+        lw * 16,
+        45
+      );
+
+      ctx.fill();
+    }
+
+    ctx.globalCompositeOperation =
+      "destination-in";
+
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = hGrad;
+
+    ctx.fillRect(0, 0, this.w, this.h);
+  }
+
+  render() {
+    const ti = this.scanningActive
+      ? this.scanTargetIntensity
+      : this.baseIntensity;
+
+    const tp = this.scanningActive
+      ? this.scanTargetParticles
+      : this.baseMaxParticles;
+
+    const tf = this.scanningActive
+      ? this.scanTargetFadeZone
+      : this.baseFadeZone;
+
+    this.currentIntensity +=
+      (ti - this.currentIntensity) *
+      this.transitionSpeed;
+
+    this.currentMaxParticles +=
+      (tp - this.currentMaxParticles) *
+      this.transitionSpeed;
+
+    this.currentFadeZone +=
+      (tf - this.currentFadeZone) *
+      this.transitionSpeed;
+
+    this.intensity = this.currentIntensity;
+
+    this.maxParticles = Math.floor(
+      this.currentMaxParticles
+    );
+
+    this.fadeZone = this.currentFadeZone;
+
+    this.ctx.globalCompositeOperation =
+      "source-over";
+
+    this.ctx.clearRect(0, 0, this.w, this.h);
+
+    this.drawLightBar();
+
+    this.ctx.globalCompositeOperation =
+      "lighter";
+
+    for (let i = 1; i <= this.count; i++) {
+      if (this.particles[i]) {
+        this.updateParticle(this.particles[i]);
+
+        this.drawParticle(this.particles[i]);
+      }
+    }
+
+    const addParticle = () => {
+      const p = this.createParticle();
+
+      p.originalAlpha = p.alpha;
+
+      this.particles[++this.count] = p;
+    };
+
+    if (
+      Math.random() < this.intensity &&
+      this.count < this.maxParticles
+    ) {
+      addParticle();
+    }
+
+    const ir =
+      this.intensity / this.baseIntensity;
+
+    if (
+      ir > 1.1 &&
+      Math.random() < (ir - 1.0) * 1.2
+    ) {
+      addParticle();
+    }
+
+    if (
+      ir > 1.3 &&
+      Math.random() < (ir - 1.3) * 1.4
+    ) {
+      addParticle();
+    }
+
+    if (
+      ir > 1.5 &&
+      Math.random() < (ir - 1.5) * 1.8
+    ) {
+      addParticle();
+    }
+
+    if (
+      ir > 2.0 &&
+      Math.random() < (ir - 2.0) * 2.0
+    ) {
+      addParticle();
+    }
+
+    if (
+      this.count >
+      this.maxParticles + 200
+    ) {
+      const ex = Math.min(
+        15,
+        this.count - this.maxParticles
+      );
+
+      for (let i = 0; i < ex; i++) {
+        delete this.particles[this.count - i];
+      }
+
+      this.count -= ex;
+    }
+  }
+
+  animate() {
+    this.render();
+
+    requestAnimationFrame(() =>
+      this.animate()
+    );
+  }
+
+  setScanningActive(active) {
+    this.scanningActive = active;
+  }
+}
+
+    const cardStream = new CardStreamController();
+
+const particleSystem = new ParticleSystem();
+
+const particleScanner = new ParticleScanner();
+
+window.setScannerScanning = (active) =>
+  particleScanner.setScanningActive(active);
+
+const style = document.createElement("style");
+
+    style.textContent = `
+      @keyframes scanEffectV {
+        0% {
+          transform: translateY(-100%);
+          opacity:0;
+        }
+
+        50% {
+          opacity:1;
+        }
+
+        100% {
+          transform:translateY(100%);
+          opacity:0;
+        }
+      }
+
+      canvas {
+        display:block;
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    return () => {
+  window.setScannerScanning = null;
+
+  if (cardStream.animationFrame) {
+    cancelAnimationFrame(
+      cardStream.animationFrame
+    );
+  }
+
+  if (particleScanner.animationFrame) {
+    cancelAnimationFrame(
+      particleScanner.animationFrame
+    );
+  }
+};
+  }, []);
 
   return (
-    <div
-      style={{
-        background: '#0b1326',
-        color: '#dae2fd',
-        minHeight: '100vh',
-        overflow: 'hidden',
-        fontFamily: 'Inter, sans-serif',
-        position: 'relative',
-      }}
-    >
-      {/* ERROR */}
-      {showError && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '100px',
-            right: '30px',
-            background: 'rgba(255, 80, 80, 0.15)',
-            border: '1px solid rgba(255, 80, 80, 0.35)',
-            color: '#ffb4ab',
-            padding: '16px 22px',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            backdropFilter: 'blur(20px)',
-            zIndex: 9999,
-            boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
-            animation: 'slideIn 0.35s ease',
-          }}
-        >
-          <span className="material-symbols-outlined">
-            warning
-          </span>
-
-          <span
-            style={{
-              fontWeight: '600',
-              fontSize: '15px',
-            }}
-          >
-            Inserte su tarjeta para continuar
-          </span>
+    <>
+      <div className="top-toolbar">
+        <div className="logo">
+          ✦ SECUREBANK | ATM
         </div>
-      )}
+      </div>
 
-      {/* HEADER */}
-      <header
-        style={{
-          background: 'rgba(23, 31, 51, 0.8)',
-          backdropFilter: 'blur(40px)',
-          borderBottom: '1px solid rgba(68, 71, 78, 0.2)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '0 40px',
-          height: '80px',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-        }}
-      >
-        <div
-          style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            color: '#b1c7f2',
-            letterSpacing: '0.5px',
-          }}
-        >
+      <div className="hero-text">
+        <div className="hero-title">
           SECUREBANK
         </div>
-      </header>
 
-      {/* MAIN */}
-      <main
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          paddingTop: '80px',
-          paddingBottom: '120px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* BACKGROUND */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '25%',
-            left: '-80px',
-            width: '384px',
-            height: '384px',
-            background: 'rgba(177, 199, 242, 0.1)',
-            borderRadius: '50%',
-            filter: 'blur(120px)',
-          }}
-        />
+        <div className="hero-subtitle">
+          Por favor, inserte su tarjeta para comenzar
+          a operar de forma segura.
+        </div>
+      </div>
+
+      <div className="scanner-visual"></div>
+
+      <div className="speed-indicator">
+        <span ref={speedValueRef}></span>
+      </div>
+
+      <div className="container">
+        <canvas
+          id="particleCanvas"
+          ref={particleCanvasRef}
+        ></canvas>
+
+        <canvas
+          id="scannerCanvas"
+          ref={scannerCanvasRef}
+        ></canvas>
 
         <div
-          style={{
-            position: 'absolute',
-            bottom: '25%',
-            right: '-80px',
-            width: '384px',
-            height: '384px',
-            background: 'rgba(74, 225, 118, 0.1)',
-            borderRadius: '50%',
-            filter: 'blur(120px)',
-          }}
-        />
-
-        <div
-          style={{
-            maxWidth: '1200px',
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '32px',
-            position: 'relative',
-            zIndex: 10,
-          }}
+          className="card-stream"
+          ref={cardStreamRef}
         >
-          {/* TITLE */}
           <div
-            style={{
-              textAlign: 'center',
-              marginBottom: '16px',
-            }}
-          >
-            <h1
-              style={{
-                fontSize: 'clamp(32px, 5vw, 48px)',
-                fontWeight: '700',
-                letterSpacing: '-0.02em',
-                lineHeight: '1.2',
-                marginBottom: '8px',
-              }}
-            >
-              Bienvenido a{' '}
-              <span style={{ color: '#b1c7f2' }}>
-                SECUREBANK
-              </span>
-            </h1>
+            className="card-line"
+            ref={cardLineRef}
+          ></div>
+        </div>
+      </div>
 
-            <p
-              style={{
-                fontSize: '20px',
-                lineHeight: '1.5',
-                color: '#c4c6cf',
-                maxWidth: '600px',
-                margin: '0 auto',
-              }}
-            >
-              Inserte su tarjeta para comenzar.
-            </p>
+      <button
+        id="insertBtn"
+        ref={insertBtnRef}
+        onClick={() => navigate("/pin")}
+      >
+        <div>
+          <div className="font-headline-md">
+            Continuar
           </div>
 
-          {/* ATM AREA */}
-          <div
-            style={{
-              position: 'relative',
-              width: '100%',
-              maxWidth: '450px',
-              height: '420px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {/* CARD */}
-            <button
-              onClick={handleCardClick}
-              aria-label="Insertar tarjeta"
-              style={{
-                ...glassStyle,
-
-                width: '288px',
-                height: '176px',
-
-                borderRadius: '18px',
-                padding: '24px',
-
-                display: 'flex',
-                flexDirection: 'column',
-
-                cursor: 'pointer',
-
-                position: 'absolute',
-                top: cardInserted
-                  ? '145px'
-                  : '40px',
-
-                zIndex: 20,
-
-                overflow: 'hidden',
-
-                transformStyle: 'preserve-3d',
-                willChange: 'transform, top, opacity',
-
-                animation: !cardInserted
-                  ? 'float 4s ease-in-out infinite'
-                  : 'none',
-
-                transform: cardInserted
-                  ? `
-                    perspective(1400px)
-                    rotateX(78deg)
-                    scale(0.62)
-                  `
-                  : `
-                    perspective(1400px)
-                    rotateX(0deg)
-                    scale(1)
-                  `,
-
-                opacity: cardInserted
-                  ? 0.18
-                  : 1,
-
-                filter: cardInserted
-                  ? 'blur(1.4px)'
-                  : 'blur(0px)',
-
-                boxShadow: cardInserted
-                  ? `
-                    0 50px 100px rgba(0,0,0,0.75),
-                    0 0 50px rgba(74,225,118,0.12)
-                  `
-                  : `
-                    0 30px 80px rgba(0,0,0,0.5),
-                    0 0 50px rgba(74,225,118,0.14)
-                  `,
-
-                transition: `
-                  top 1.25s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 1.25s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity 1s ease,
-                  filter 1s ease,
-                  box-shadow 1s ease
-                `,
-              }}
-            >
-              {/* SHINE */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '-50%',
-                  left: '-60%',
-                  width: '80%',
-                  height: '240%',
-                  background:
-                    'linear-gradient(to right, transparent, rgba(255,255,255,0.14), transparent)',
-                  transform: 'rotate(25deg)',
-                  animation: !cardInserted
-                    ? 'shine 4s linear infinite'
-                    : 'none',
-                }}
-              />
-
-              {/* CHIP */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '32px',
-                  transform: 'translateY(-50%)',
-                  width: '44px',
-                  height: '34px',
-                  background:
-                    'linear-gradient(135deg, #ffe082, #ffb300)',
-                  borderRadius: '6px',
-                  border:
-                    '1px solid rgba(255,255,255,0.25)',
-                  boxShadow:
-                    '0 0 20px rgba(255,215,0,0.25)',
-                }}
-              />
-
-              {/* VISA */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '18px',
-                  right: '18px',
-                  width: '52px',
-                  height: '32px',
-                  background:
-                    'rgba(177, 199, 242, 0.18)',
-                  borderRadius: '8px',
-                  backdropFilter: 'blur(4px)',
-                }}
-              />
-
-              {/* CARD TEXT */}
-              <div style={{ marginTop: 'auto' }}>
-                <div
-                  style={{
-                    width: '60%',
-                    height: '14px',
-                    background:
-                      'rgba(255,255,255,0.18)',
-                    borderRadius: '999px',
-                    marginBottom: '10px',
-                  }}
-                />
-
-                <div
-                  style={{
-                    width: '78%',
-                    height: '12px',
-                    background:
-                      'rgba(255,255,255,0.08)',
-                    borderRadius: '999px',
-                  }}
-                />
-              </div>
-            </button>
-
-            {/* SLOT */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '220px',
-                width: '320px',
-                height: '18px',
-                background:
-                  'linear-gradient(to bottom, #111827, #05070d)',
-                borderRadius: '999px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-
-                boxShadow: `
-                  inset 0 3px 12px rgba(0,0,0,0.9),
-                  0 0 25px rgba(0,0,0,0.5)
-                `,
-
-                overflow: 'visible',
-              }}
-            >
-              {/* SLOT GLOW */}
-              <div
-                style={{
-                  position: 'absolute',
-                  width: cardInserted
-                    ? '360px'
-                    : '280px',
-
-                  height: cardInserted
-                    ? '40px'
-                    : '20px',
-
-                  background:
-                    'radial-gradient(circle, rgba(74,225,118,0.7), transparent 72%)',
-
-                  filter: 'blur(24px)',
-
-                  opacity: cardInserted
-                    ? 1
-                    : 0.45,
-
-                  transform: cardInserted
-                    ? 'scale(1.2)'
-                    : 'scale(1)',
-
-                  transition: `
-                    all 0.8s cubic-bezier(0.16, 1, 0.3, 1)
-                  `,
-                }}
-              />
-
-              {/* SLOT LIGHT */}
-              <div
-                style={{
-                  width: '290px',
-                  height: '4px',
-                  borderRadius: '999px',
-
-                  background: cardInserted
-                    ? '#6bff8f'
-                    : '#4ae176',
-
-                  boxShadow: cardInserted
-                    ? `
-                      0 0 25px rgba(107,255,143,1),
-                      0 0 50px rgba(107,255,143,0.7)
-                    `
-                    : `
-                      0 0 15px rgba(74,225,118,0.8)
-                    `,
-
-                  animation: cardInserted
-                    ? 'scanner 1.1s linear infinite'
-                    : 'pulse 2s ease infinite',
-
-                  transition: 'all 0.5s ease',
-                }}
-              />
-            </div>
-
-            {/* TEXT */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '280px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-
-                color: '#4ae176',
-
-                animation:
-                  'breathe 2.5s ease-in-out infinite',
-              }}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  fontSize: '32px',
-                }}
-              >
-                credit_card
-              </span>
-
-              <span
-                style={{
-                  fontSize: '16px',
-                  fontWeight: '700',
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {cardInserted
-                  ? 'Tarjeta Insertada'
-                  : 'Inserte Tarjeta'}
-              </span>
-            </div>
-          </div>
-
-          {/* BUTTONS */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns:
-                'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '32px',
-              width: '100%',
-              maxWidth: '900px',
-              marginTop: '32px',
-            }}
-          >
-            <button
-              onClick={handleSpanishClick}
-              style={{
-                ...glassStyle,
-                padding: '24px',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                borderLeft: '4px solid #4ae176',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '24px',
-                }}
-              >
-                <span
-                  className="material-symbols-outlined"
-                  style={{
-                    fontSize: '40px',
-                    color: '#4ae176',
-                  }}
-                >
-                  language
-                </span>
-
-                <div style={{ textAlign: 'left' }}>
-                  <div
-                    style={{
-                      fontSize: '24px',
-                      fontWeight: '600',
-                    }}
-                  >
-                    Español
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: '16px',
-                      color: '#c4c6cf',
-                    }}
-                  >
-                    Continuar en español
-                  </div>
-                </div>
-              </div>
-
-              <span className="material-symbols-outlined">
-                chevron_right
-              </span>
-            </button>
+          <div className="font-label-lg">
+            Oprimir para ingresar a SECUREBANK.
           </div>
         </div>
-      </main>
+      </button>
 
-      {/* ANIMATIONS */}
-      <style>{`
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
+      <div className="secure-footer-nav">
+        <div className="footer-left">
+          <div className="footer-logo">
+            ✦ SECUREBANK
+          </div>
 
-          50% {
-            opacity: 0.45;
-          }
-        }
+          <div className="footer-copy">
+            © 2026 SecureBank International
+          </div>
+        </div>
 
-        @keyframes scanner {
-          0% {
-            transform: scaleX(0.6);
-            opacity: 0.4;
-          }
+        <div className="footer-links">
+          <a href="#">Seguridad</a>
+          <a href="#">Privacidad</a>
+          <a href="#">Términos</a>
+          <a href="#">Soporte</a>
+        </div>
 
-          50% {
-            transform: scaleX(1);
-            opacity: 1;
-          }
-
-          100% {
-            transform: scaleX(0.6);
-            opacity: 0.4;
-          }
-        }
-
-        @keyframes breathe {
-          0%, 100% {
-            opacity: 0.7;
-            transform: scale(1);
-          }
-
-          50% {
-            opacity: 1;
-            transform: scale(1.03);
-          }
-        }
-
-        @keyframes shine {
-          0% {
-            transform:
-              translateX(-250%)
-              rotate(25deg);
-          }
-
-          100% {
-            transform:
-              translateX(450%)
-              rotate(25deg);
-          }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform:
-              perspective(1400px)
-              translateY(0px)
-              rotateX(0deg)
-              rotateZ(0deg);
-          }
-
-          25% {
-            transform:
-              perspective(1400px)
-              translateY(-10px)
-              rotateX(2deg)
-              rotateZ(-1deg);
-          }
-
-          50% {
-            transform:
-              perspective(1400px)
-              translateY(-16px)
-              rotateX(4deg)
-              rotateZ(1deg);
-          }
-
-          75% {
-            transform:
-              perspective(1400px)
-              translateY(-8px)
-              rotateX(2deg)
-              rotateZ(-0.5deg);
-          }
-        }
-
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(40px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
-    </div>
+        <button className="footer-help-btn">
+          <span>◎</span>
+          ¿Necesita ayuda?
+        </button>
+      </div>
+    </>
   );
 };
 
 export default ATMWelcome;
-
