@@ -167,7 +167,7 @@ const ChangePinScreen = () => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <span style={{ fontSize: '24px', fontWeight: 'bold', letterSpacing: '0.5px', color: '#b1c7f2' }}>
-            SECUREBANK
+             ✦ SECUREBANK | ATM
           </span>
         </div>
       </header>

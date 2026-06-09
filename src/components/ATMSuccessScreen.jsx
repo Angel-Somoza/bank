@@ -118,7 +118,7 @@ const WithdrawalSuccess = () => {
 
       {/* Header */}
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 20px", height: "60px", background: "rgba(23,31,51,0.8)", backdropFilter: "blur(40px)", borderBottom: "1px solid rgba(68,71,78,0.2)", position: "fixed", top: 0, left: 0, right: 0, zIndex: 50, animation: "fadeInDown 0.8s ease-out forwards" }}>
-        <div style={{ fontSize: "20px", fontWeight: "800", color: "#b1c7f2" }}>SECUREBANK</div>
+        <div style={{ fontSize: "20px", fontWeight: "800", color: "#b1c7f2" }}> ✦ SECUREBANK | ATM</div>
         <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "#c4c6cf" }}>
           <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>wifi</span>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>

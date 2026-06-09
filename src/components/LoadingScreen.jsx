@@ -164,7 +164,7 @@ const LoadingScreen = ({ message = "Procesando..." }) => {
                         margin: 0,
                     }}
                 >
-                    SECUREBANK
+                     ✦ SECUREBANK | ATM
                 </h1>
             </div>
 

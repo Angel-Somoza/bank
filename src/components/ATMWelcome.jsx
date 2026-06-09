@@ -1,11 +1,11 @@
 
-import { useEffect, useRef } from "react";
-import * as THREE from "three";
+import { useEffect, useRef, useState } from "react";import * as THREE from "three";
 import "./styles.css";
 import { useNavigate } from "react-router-dom";
 
 const ATMWelcome = () => {
   const navigate = useNavigate();
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const cardStreamRef = useRef(null);
   const cardLineRef = useRef(null);
   const speedValueRef = useRef(null);
@@ -1255,11 +1255,58 @@ const style = document.createElement("style");
           <a href="#">Soporte</a>
         </div>
 
-        <button className="footer-help-btn">
-          <span>◎</span>
-          ¿Necesita ayuda?
+        <button
+  className="footer-help-btn"
+  onClick={() => setShowHelpModal(true)}
+>
+  <span>◎</span>
+  ¿Necesita ayuda?
+</button>
+      </div>
+      {showHelpModal && (
+  <div
+    className="help-modal-overlay"
+    onClick={() => setShowHelpModal(false)}
+  >
+    <div
+      className="help-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="help-modal-header">
+        <h2>Centro de Ayuda</h2>
+
+        <button
+          className="close-modal-btn"
+          onClick={() => setShowHelpModal(false)}
+        >
+          ✕
         </button>
       </div>
+
+      <p className="help-modal-subtitle">
+        Comuníquese con SecureBank utilizando
+        cualquiera de los siguientes números:
+      </p>
+
+      <div className="help-phone-list">
+        <div className="help-phone-item">
+          <span>Atención al cliente</span>
+          <strong>+502 2222-0101</strong>
+        </div>
+
+        <div className="help-phone-item">
+          <span>Soporte ATM</span>
+          <strong>+502 2222-0202</strong>
+        </div>
+
+        <div className="help-phone-item">
+          <span>Emergencias</span>
+          <strong>+502 2222-0303</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </>
   );
 };

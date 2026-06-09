@@ -214,7 +214,7 @@ const AmountScreen = () => {
                         letterSpacing: "0.5px",
                     }}
                 >
-                    SECUREBANK
+                     ✦ SECUREBANK | ATM
                 </div>
 
                 <div
